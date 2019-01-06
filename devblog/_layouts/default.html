@@ -1,3 +1,7 @@
+---
+layout: compress
+--- 
+
 <!DOCTYPE html>
 <html lang="en-us">
 
@@ -19,9 +23,11 @@
         </div>
       </div>
 
-      <div class="container content">
-        {{ content }}
-      </div>
+      <div class="container">
+          <div class="wrapper">
+            {{ content }}
+          </div>
+        </div>
     </div>
 
     <label for="sidebar-checkbox" class="sidebar-toggle"></label>
@@ -43,5 +49,7 @@
         }, false);
       })(document);
     </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+    <script src="/src/js/bootstrap.min.js"></script>
   </body>
 </html>

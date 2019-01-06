@@ -11,17 +11,18 @@ github_username:  jekyll
 
 # Build settings
 markdown: kramdown
+permalink: /:title/
+paginate: 6
+paginate_path: /page:num/
+
+sass:
+  style: compressed
+
 plugins:
   - jekyll-feed
+  - jekyll-paginate
+  - jekyll-seo-tag
 
-# Exclude from processing.
-# The following items will not be processed, by default. Create a custom list
-# to override the default setting.
-# exclude:
-#   - Gemfile
-#   - Gemfile.lock
-#   - node_modules
-#   - vendor/bundle/
-#   - vendor/cache/
-#   - vendor/gems/
-#   - vendor/ruby/
+# Ruby Gems
+plugins: [jekyll-paginate, jekyll-seo-tag]
+
