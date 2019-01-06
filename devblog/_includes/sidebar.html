@@ -1,11 +1,10 @@
-<!-- Target for toggling the sidebar `.sidebar-checkbox` is for regular
-     styles, `#sidebar-checkbox` for behavior. -->
 <input type="checkbox" class="sidebar-checkbox" id="sidebar-checkbox">
 
 <!-- Toggleable sidebar -->
 <div class="sidebar" id="sidebar">
+
   <div class="sidebar-item">
-    <p>{{ site.title }}</p>
+    <h4 style="color: white;">{{ site.title }}</h4>
   </div>
 
   <!-- Geração do menu lateral -->
@@ -13,7 +12,6 @@
     {% for item in site.data.urls %}
       <a class="sidebar-nav-item" href="{{ item.url }}">{{ item.title }}</a>
     {% endfor %}
-    <!-- <span class="sidebar-nav-item">Currently v{{ site.version }}</span> -->
   </nav>
 
   <div class="sidebar-item">
