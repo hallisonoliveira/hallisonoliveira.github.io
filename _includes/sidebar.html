@@ -1,0 +1,31 @@
+<input type="checkbox" class="sidebar-checkbox" id="sidebar-checkbox">
+
+<!-- Toggleable sidebar -->
+<div class="sidebar" id="sidebar">
+  
+  <div class="sidebar-item">
+    <h4 style="color: white; text-align: center">{{ site.title }}</h4>
+  </div>
+
+  <div style="text-align: center">
+    <a href="https://www.linkedin.com/in/hallisonoliveira" style="margin-right: 8px">
+      <img src="src/images/linkedin.png"/>
+    </a>
+    <a href="https://github.com/hallisonoliveira">
+      <img src="src/images/github.png"/>
+    </a>
+  </div>
+  <br/>
+  <!-- Geração do menu lateral -->
+  <nav class="sidebar-nav">
+    {% for item in site.data.urls %}
+      <a class="sidebar-nav-item" href="{{ item.url }}">{{ item.title }}</a>
+    {% endfor %}
+  </nav>
+
+  <div class="sidebar-item">
+    <p>
+      &copy; {{ site.time | date: '%Y' }}. Todos os direitos reservados.
+    </p>
+  </div>
+</div>
