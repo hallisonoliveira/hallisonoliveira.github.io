@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Inauguração - Jekyll, VS Code e Ubuntu 18.04
+title: Jekyll, VS Code e Ubuntu 18.04
 img: jekyll-vscode-ubuntu.png
 category: jekyll 
 tags: [
@@ -48,7 +48,7 @@ O Ubuntu possui versões não só para desktop, mas também para servidors, solu
 O download e as instruções estão disponíveis no <a href="https://ubuntu.com/">site oficial</a>.
 
 ### Github Pages
-Talvez uma das dúvidas mais comuns ao criar um site pessoal ou blog é **Onde hospedar?**. Tive essa mesma dúvida quando tive a idéia de criar o blog. Mas o GitHub Pages é uma excelente solução para isso.
+Talvez uma das dúvidas mais comuns ao criar um site pessoal ou blog é **Onde hospedar?** Tive essa mesma dúvida quando tive a idéia de criar o blog. Mas o GitHub Pages é uma excelente solução para isso.
 
 Com ele é possível hospedar sites estáticos criando um repositório no <a href="https://github.com/">Github</a>, sem a necessidade de se preocupar com base de dados, configurações complicadas e servidores Web. Realmente, uma excelente opção para quem quer criar um blog ou site de portfólio ou projeto de maneira simples e rápida.
 
