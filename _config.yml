@@ -22,3 +22,5 @@ plugins:
 # Ruby Gems
 plugins: [jekyll-paginate, jekyll-seo-tag]
 
+# Google Analytics
+google_analytics: UA—145249329-1
