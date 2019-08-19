@@ -2,7 +2,7 @@
 layout: post
 title: Jekyll, VS Code e Ubuntu 18.04
 img: jekyll-vscode-ubuntu.png
-category: jekyll 
+category: Jekyll 
 tags: [
     jekyll,
     vscode,

@@ -2,7 +2,7 @@
 layout: post
 title: Executar um aplicativo automaticamente ao ligar o dispositivo
 img: autorun_app_android.png
-category: android
+category: Android
 tags: [
     android,
     kotlin
