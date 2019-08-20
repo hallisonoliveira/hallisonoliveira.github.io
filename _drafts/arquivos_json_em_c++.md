@@ -11,13 +11,23 @@ tags: [
 comments: true
 ---
 
-======================================================================================
+Arquivos JSON são extremamente simples de serem entendidos e utilizados. Essa simplicidade fez com que o JSON se tornasse uma alternativa mais simples e leve para o uso do XML.
 
-Arquivos JSON são extremamente simples de serem entendidos e utilizados. Essa simplicidade fez com que o JSON se tornasse uma alternativa para o uso do XML.
+Existem várias bibliotecas para se trabalhar com JSON nas mais variadas linguagens. No <a href="https://www.json.org/json-pt.html">site oficial</a> (em português), é possível ver uma lista com algumas delas.
 
-Existem várias bibliotecas para se trabalhar com JSON nas mais variadas linguagens. Em C++ isso não é diferente. No <a href="https://www.json.org/json-pt.html">site oficial (em português), é possível ver uma lista com algumas delas.
+Esse artigo explica como fazer a leitura e gravação de arquivos JSON em C++ utilizando o **Boost**.
 
-Esse artigo explica como fazer a leitura e gravação de arquivos JSON em C++ utilizando o **Boost**. 
+O <a href="https://www.boost.org/">Boost</a> é uma variada coleção de bibliotecas que estendem o C++, deixando-o ainda mais poderoso. Para a leitura e gravação de arquivos JSON, podemos utilizar a biblioteca **Property Tree** presente no Boost. Essa biblioteca fornece uma estrutura de dados que armazena uma árvore de valores no formato de chave e valor, onde os valores podem ser textos, números ou até mesmo uma lista ou nova árvore.
+
+Lembrando que a Property Tree pode ser utilizada também para leitura e gravação de arquivos XML e INI.
+
+Abaixo, um exemplo de como é possível ler um arquivo JSON com o Boost::Property_Tree.
+
+## Leitura
+
+
+
+
 
 
 
