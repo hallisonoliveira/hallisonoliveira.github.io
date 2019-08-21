@@ -13,11 +13,11 @@ comments: true
 
 Arquivos JSON são extremamente simples de serem entendidos e utilizados. Essa simplicidade fez com que o JSON se tornasse uma alternativa mais simples e leve para o uso do XML.
 
-Existem várias bibliotecas para se trabalhar com JSON nas mais variadas linguagens. No <a href="https://www.json.org/json-pt.html">site oficial</a> (em português), é possível ver uma lista com algumas delas.
+Existem várias bibliotecas para se trabalhar com JSON nas mais variadas linguagens. No [site oficial](https://www.json.org/json-pt.html) (em português), é possível ver uma lista com algumas delas.
 
 Esse artigo explica como fazer a leitura e gravação de arquivos JSON em C++ utilizando o **Boost**.
 
-O <a href="https://www.boost.org/">Boost</a> é uma variada coleção de bibliotecas que estendem o C++, deixando-o ainda mais poderoso. Para a leitura e gravação de arquivos JSON, podemos utilizar a biblioteca **Property Tree** presente no Boost. Essa biblioteca fornece uma estrutura de dados que armazena uma árvore de valores no formato de chave e valor, onde os valores podem ser textos, números ou até mesmo uma lista ou nova árvore.
+O [Boost](https://www.boost.org/) é uma variada coleção de bibliotecas que estendem o C++, deixando-o ainda mais poderoso. Para a leitura e gravação de arquivos JSON, podemos utilizar a biblioteca **Property Tree** presente no Boost. Essa biblioteca fornece uma estrutura de dados que armazena uma árvore de valores no formato de chave e valor, onde os valores podem ser textos, números ou até mesmo uma lista ou nova árvore.
 
 Lembrando que a Property Tree pode ser utilizada também para leitura e gravação de arquivos XML e INI.
 
@@ -27,77 +27,40 @@ Abaixo, um exemplo de como é possível ler um arquivo JSON com o Boost::Propert
 
 Para esse exemplo, vamos utilizar o seguinte arquivo JSON:
 
-/*
-    {
-        "name": "Luke Skywalker",
-        "height": "172",
-        "mass": "77",
-        "hair_color": "blond",
-        "skin_color": "fair",
-        "eye_color": "blue",
-        "birth_year": "19BBY",
-        "gender": "male",
-        "homeworld": "https://swapi.co/api/planets/1/",
-        "films": [
-            "https://swapi.co/api/films/2/",
-            "https://swapi.co/api/films/6/",
-            "https://swapi.co/api/films/3/",
-            "https://swapi.co/api/films/1/",
-            "https://swapi.co/api/films/7/"
-        ],
-        "species": [
-            "https://swapi.co/api/species/1/"
-        ],
-        "vehicles": [
-            "https://swapi.co/api/vehicles/14/",
-            "https://swapi.co/api/vehicles/30/"
-        ],
-        "starships": [
-            "https://swapi.co/api/starships/12/",
-            "https://swapi.co/api/starships/22/"
-        ],
-        "created": "2014-12-09T13:50:51.644000Z",
-        "edited": "2014-12-20T21:17:56.891000Z",
-        "url": "https://swapi.co/api/people/1/"
-    }
-*/
+<script src="https://gist.github.com/hallisonoliveira/b6f4c64022474c441460b1b69836ab5b.js"></script>
 
-Esse arquivo de exemplo foi extraído da <a href="https://swapi.co/">Star Wars API</a>. Uma API muito legal que possui várias as informações dos filmes da saga, como planetas, espaço naves, veículos e personagens até o episódio 7 (The Force Awakens), tudo em formato JSON. Para quem é fã da saga, vale a pena dar uma olhada.
+Esse arquivo de exemplo foi extraído da [StarWars API](https://swapi.co/). Uma API muito legal que possui várias as informações dos filmes da saga como planetas, espaço naves, veículos e personagens, até o episódio 7 (The Force Awakens), tudo em formato JSON. Para quem é fã da saga, vale a pena dar uma olhada.
 
+No gist abaixo, está o código completo para realizar a leitura do arquivo JSON.
 
-/*
-#include <iostream>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
+<script src="https://gist.github.com/hallisonoliveira/a0c6a548885c7df459d0003954e6c1d2.js"></script>
 
-#include <boost/foreach.hpp>
+### Explicando por partes:
 
-int main() {
-    
-    // Objeto ptree utilizado para manipulação do conteúdo do arquivo
-    boost::property_tree::ptree luke_ptree;
+Primeiro, criamos um objeto do tipo **ptree** que receberá o conteúdo do arquivo para que possamos manipula-lo.
 
-    // Adição do conteúdo do arquivo no ptree
-    // O primeiro parametro é o nome do arquivo e o segundo parâmetro é o objeto ptree que receberá o conteúdo
-    boost::property_tree::read_json("luke_skywalker.json", luke_ptree);
+> boost::property_tree::ptree luke_ptree;
 
-    // Leitura de uma string no primeiro nivel da arvore
-    std::cout << luke_ptree.get<std::string>("name") << std::endl;
+Precisamos importar a biblioteca **boost/property_tree/ptree.hpp** para isso.
 
-    // Leitura de um inteiro no primeiro nivel da arvore
-    std::cout << luke_ptree.get<int>("height") << std::endl;
+Criado o objeto, adicionamos o conteúdo do arquivo à ele utilizando o método [read_json](https://www.boost.org/doc/libs/1_65_1/doc/html/boost/property_tree/json_parser/read_json_idp699443552.html) presente na biblioteca **boost/property_tree/json_parser.hpp**.
 
-    // Listar as naves associadas
-    BOOST_FOREACH(boost::property_tree::ptree::value_type &starships_node, luke_ptree.get_child("starships")) {
-        boost::property_tree::ptree &starship = starships_node.second;
+> boost::property_tree::read_json("luke_skywalker.json", luke_ptree);
 
-        std::cout << starship.get<std::string>("") << std::endl;
-    }
+Esse método precisa de dois parâmetros. O primeiro é uma String referente ao nome do arquivo JSON a ser lido. O segundo parâmetro é o objeto *ptree* que receberá o conteúdo. Nesse processo, o conteúdo é traduzido para o formato de chave/valor.
 
-    return 0;
-}
-*/
+Com isso, já podemos acessar o conteúdo do arquivo através do *ptree*. Basta utilizar o método *get* especificando o tipo de dado a ser lido. No código de exemplo, fazemos a leitura de uma *String* e um inteiro.
 
+> luke_ptree.get<std::string>("name")
+> luke_ptree.get<int>("height")
+
+Os dois parâmetros acima (*name* e *height*) estão no primeiro nível do JSON e por isso, podemos acessa-los diretamente.
+
+Para listar os itens de uma lista, podemos utilizar o *Foreach* do *Boost* presente na bibliteca **boost/foreach.hpp**, conforme abaixo:
+
+> BOOST_FOREACH(boost::property_tree::ptree::value_type &starships_node, luke_ptree.get_child("starships")) {
+>   std::cout << starships_node.second.get<std::string>("") << std::endl;
+> }
 
 
 /*
