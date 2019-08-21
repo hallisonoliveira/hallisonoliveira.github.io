@@ -25,9 +25,78 @@ Abaixo, um exemplo de como é possível ler um arquivo JSON com o Boost::Propert
 
 ## Leitura
 
+Para esse exemplo, vamos utilizar o seguinte arquivo JSON:
+
+/*
+    {
+        "name": "Luke Skywalker",
+        "height": "172",
+        "mass": "77",
+        "hair_color": "blond",
+        "skin_color": "fair",
+        "eye_color": "blue",
+        "birth_year": "19BBY",
+        "gender": "male",
+        "homeworld": "https://swapi.co/api/planets/1/",
+        "films": [
+            "https://swapi.co/api/films/2/",
+            "https://swapi.co/api/films/6/",
+            "https://swapi.co/api/films/3/",
+            "https://swapi.co/api/films/1/",
+            "https://swapi.co/api/films/7/"
+        ],
+        "species": [
+            "https://swapi.co/api/species/1/"
+        ],
+        "vehicles": [
+            "https://swapi.co/api/vehicles/14/",
+            "https://swapi.co/api/vehicles/30/"
+        ],
+        "starships": [
+            "https://swapi.co/api/starships/12/",
+            "https://swapi.co/api/starships/22/"
+        ],
+        "created": "2014-12-09T13:50:51.644000Z",
+        "edited": "2014-12-20T21:17:56.891000Z",
+        "url": "https://swapi.co/api/people/1/"
+    }
+*/
+
+Esse arquivo de exemplo foi extraído da <a href="https://swapi.co/">Star Wars API</a>. Uma API muito legal que possui várias as informações dos filmes da saga, como planetas, espaço naves, veículos e personagens até o episódio 7 (The Force Awakens), tudo em formato JSON. Para quem é fã da saga, vale a pena dar uma olhada.
 
 
+/*
+#include <iostream>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
+#include <boost/foreach.hpp>
+
+int main() {
+    
+    // Objeto ptree utilizado para manipulação do conteúdo do arquivo
+    boost::property_tree::ptree luke_ptree;
+
+    // Adição do conteúdo do arquivo no ptree
+    // O primeiro parametro é o nome do arquivo e o segundo parâmetro é o objeto ptree que receberá o conteúdo
+    boost::property_tree::read_json("luke_skywalker.json", luke_ptree);
+
+    // Leitura de uma string no primeiro nivel da arvore
+    std::cout << luke_ptree.get<std::string>("name") << std::endl;
+
+    // Leitura de um inteiro no primeiro nivel da arvore
+    std::cout << luke_ptree.get<int>("height") << std::endl;
+
+    // Listar as naves associadas
+    BOOST_FOREACH(boost::property_tree::ptree::value_type &starships_node, luke_ptree.get_child("starships")) {
+        boost::property_tree::ptree &starship = starships_node.second;
+
+        std::cout << starship.get<std::string>("") << std::endl;
+    }
+
+    return 0;
+}
+*/
 
 
 
