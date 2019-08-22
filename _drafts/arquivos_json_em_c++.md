@@ -39,28 +39,52 @@ No gist abaixo, está o código completo para realizar a leitura do arquivo JSON
 
 Primeiro, criamos um objeto do tipo **ptree** que receberá o conteúdo do arquivo para que possamos manipula-lo.
 
-> boost::property_tree::ptree luke_ptree;
+~~~cpp
+boost::property_tree::ptree luke_ptree;
+~~~
 
 Precisamos importar a biblioteca **boost/property_tree/ptree.hpp** para isso.
 
 Criado o objeto, adicionamos o conteúdo do arquivo à ele utilizando o método [read_json](https://www.boost.org/doc/libs/1_65_1/doc/html/boost/property_tree/json_parser/read_json_idp699443552.html) presente na biblioteca **boost/property_tree/json_parser.hpp**.
 
-> boost::property_tree::read_json("luke_skywalker.json", luke_ptree);
+~~~cpp
+boost::property_tree::read_json("luke_skywalker.json", luke_ptree);
+~~~
 
 Esse método precisa de dois parâmetros. O primeiro é uma String referente ao nome do arquivo JSON a ser lido. O segundo parâmetro é o objeto *ptree* que receberá o conteúdo. Nesse processo, o conteúdo é traduzido para o formato de chave/valor.
 
 Com isso, já podemos acessar o conteúdo do arquivo através do *ptree*. Basta utilizar o método *get* especificando o tipo de dado a ser lido. No código de exemplo, fazemos a leitura de uma *String* e um inteiro.
 
-> luke_ptree.get<std::string>("name")
-> luke_ptree.get<int>("height")
+~~~cpp
+luke_ptree.get<std::string>("name")
+~~~
+
+~~~cpp
+luke_ptree.get<int>("height")
+~~~
 
 Os dois parâmetros acima (*name* e *height*) estão no primeiro nível do JSON e por isso, podemos acessa-los diretamente.
 
-Para listar os itens de uma lista, podemos utilizar o *Foreach* do *Boost* presente na bibliteca **boost/foreach.hpp**, conforme abaixo:
+Para listar os itens de uma lista, podemos utilizar o [Foreach](https://theboostcpplibraries.com/boost.foreach) do *Boost* presente na bibliteca **boost/foreach.hpp**, conforme abaixo:
 
-> BOOST_FOREACH(boost::property_tree::ptree::value_type &starships_node, luke_ptree.get_child("starships")) {
->   std::cout << starships_node.second.get<std::string>("") << std::endl;
-> }
+~~~cpp
+BOOST_FOREACH(boost::property_tree::ptree::value_type &films_node, luke_ptree.get_child("films")) {
+    std::cout << films_node.second.get<std::string>("") << std::endl;
+}
+~~~
+
+O *foreach* do *Boost* possui um funcionamento bem simples. Ele utiliza dois parâmetros. O primeiro é a variavel ou referência que receberá o item da lista na iteração. O segundo parâmetro é a lista a ser iterada.
+
+É importante ressaltar que o tipo da variável ou referencia que irá receber o valor da lista deve ser do mesmo tipo do item da lista. A partir do **C++11**, podemos utilizar o [auto](https://en.cppreference.com/w/cpp/language/auto) dentro do *foreach*. Assim, não precisamos nos preocupar com o tipo. O código ficaria da seguinte forma:
+
+~~~cpp
+BOOST_FOREACH(auto films_node, luke_ptree.get_child("films")) {
+    std::cout << films_node.second.get<std::string>("") << std::endl;
+}
+~~~
+
+Para acesso ao item da lista, precisamos utilizar o *second* do objeto de item. Ele é utilizado para acessar o subnível do item. Dentro do subnível, basta utilizar o *get* da mesma forma que utilizamos anteriormente, sempre passando o tipo de valor a ser lido.
+
 
 
 /*
