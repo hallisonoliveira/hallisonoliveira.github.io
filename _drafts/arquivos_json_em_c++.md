@@ -35,7 +35,7 @@ No gist abaixo, está o código completo para realizar a leitura do arquivo JSON
 
 <script src="https://gist.github.com/hallisonoliveira/a0c6a548885c7df459d0003954e6c1d2.js"></script>
 
-### Explicando por partes:
+### Explicando por partes
 
 Primeiro, criamos um objeto do tipo **ptree** que receberá o conteúdo do arquivo para que possamos manipula-lo.
 
@@ -75,63 +75,24 @@ BOOST_FOREACH(boost::property_tree::ptree::value_type &films_node, luke_ptree.ge
 
 O *foreach* do *Boost* possui um funcionamento bem simples. Ele utiliza dois parâmetros. O primeiro é a variavel ou referência que receberá o item da lista na iteração. O segundo parâmetro é a lista a ser iterada.
 
-É importante ressaltar que o tipo da variável ou referencia que irá receber o valor da lista deve ser do mesmo tipo do item da lista. A partir do **C++11**, podemos utilizar o [auto](https://en.cppreference.com/w/cpp/language/auto) dentro do *foreach*. Assim, não precisamos nos preocupar com o tipo. O código ficaria da seguinte forma:
+É importante ressaltar que o tipo da variável/referencia que irá receber o valor da lista deve ser do mesmo tipo do item da lista. A partir do **C++11**, podemos utilizar o [auto](https://en.cppreference.com/w/cpp/language/auto) para declaração de variáveis. Assim, podemos utiliza-lo dentro do *foreach* e não precisamos nos preocupar com o tipo.
+
+Outro ponto é que no C++ podemos trabalhar com os endereços de memória dos objetos. Conforme citado acima, o *foreach* também aceita o uso de referência, basta colocar o **&** antes do nome do objeto. O código abaixo demonstra como seria o uso do *auto* declarando uma referência de objeto.
 
 ~~~cpp
-BOOST_FOREACH(auto films_node, luke_ptree.get_child("films")) {
+BOOST_FOREACH(auto &films_node, luke_ptree.get_child("films")) {
     std::cout << films_node.second.get<std::string>("") << std::endl;
 }
 ~~~
 
-Para acesso ao item da lista, precisamos utilizar o *second* do objeto de item. Ele é utilizado para acessar o subnível do item. Dentro do subnível, basta utilizar o *get* da mesma forma que utilizamos anteriormente, sempre passando o tipo de valor a ser lido.
+Para acesso ao item da lista, precisamos utilizar o *second* do objeto. Ele é utilizado para acessar o subnível do item. Dentro do subnível, basta utilizar o *get* da mesma forma que utilizamos anteriormente, sempre passando o tipo de valor a ser lido.
+
+## Gravação
+
+Para exemplificar a gravação, vamos adicionar mais algumas informações no arquivo JSON utilizado acima. 
 
 
 
-/*
-void read_json_from_file()
-{
-    boost::filesystem::path file_path("/home/holiveira/Desenvolvimento/sensors_100.json");
-
-    while (true)
-    {
-        const std::locale &loc = std::locale();
-        cout << loc.name() << endl;
-
-        boost::property_tree::ptree pt;
-
-        try
-        {
-        boost::property_tree::read_json(file_path.string(), pt);
-        } catch (...) {
-           cout << "XXXXXXXXXXXXXXXXXXXXX" << endl;
-        }
-
-        //boost::property_tree::ptree listNode;
-        try
-        {
-            BOOST_AUTO(listNode,  pt.get_child("sensors"));
-            std::pair<boost::property_tree::ptree::const_assoc_iterator, boost::property_tree::ptree::const_assoc_iterator> bounds = listNode.equal_range("");
-
-            boost::property_tree::ptree sensor_pt(bounds.first->second);
-
-            cout << "ID: " << sensor_pt.get<int>("id") << endl;
-
-            BOOST_FOREACH(boost::property_tree::ptree::value_type &faixas_node, sensor_pt.get_child("lanes") )
-            {
-                boost::property_tree::ptree &faixas_pt = faixas_node.second;
-
-                cout << "ID: " << faixas_pt.get<int>("id") << endl;
-            }
-
-            cout << "Leitura OK" << endl;
-        } catch (...) {
-            cout << "Erro ao ler conteudo" << endl;
-        }
-
-        sleep(0.5);
-    }
-}
-*/
 ========================================================================================================
 /*
 boost::filesystem::path lr_camera_file("/home/holiveira/Desenvolvimento/cameras_lr.json");
