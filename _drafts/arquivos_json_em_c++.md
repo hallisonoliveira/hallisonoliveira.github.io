@@ -85,7 +85,7 @@ BOOST_FOREACH(auto &films_node, luke_ptree.get_child("films")) {
 }
 ~~~
 
-Para acesso ao item da lista, precisamos utilizar o *second* do objeto. Ele é utilizado para acessar o subnível do item. Dentro do subnível, basta utilizar o *get* da mesma forma que utilizamos anteriormente, sempre passando o tipo de valor a ser lido.
+Para acesso ao item da lista, precisamos utilizar o *second* do objeto. Ele é utilizado para acessar o subnível do item. Dentro do subnível, basta utilizar o *get* da mesma forma que utilizamos anteriormente, sempre passando o tipo de valor a ser lido. Chamamos o *get* passando uma *String* vazia como parâmetro. Devemos fazer isso pois nesse caso, o *second* nos retorna um *std::pair("", ptree)*.
 
 ## Gravação
 
@@ -191,3 +191,83 @@ void create_json_from_files_of_folder()
     }
 
 }
+
+
+GRAVAÇÂO
+
+#include <iostream>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+
+#include <boost/foreach.hpp>
+
+int main() {
+    
+    // Definição dos atributos
+    std::string name = "Leia Organa";
+    int height = 150;
+    std::string hair_color = "brown";
+    std::string eye_color = "brown";
+
+    boost::property_tree::ptree leia_ptree;
+
+    leia_ptree.put("name", name);
+    leia_ptree.put("height", height);
+    leia_ptree.put("hair_color", hair_color);
+    leia_ptree.put("eye_color", eye_color);
+
+    boost::property_tree::ptree film_1_ptree;
+    boost::property_tree::ptree film_3_ptree;
+    boost::property_tree::ptree film_6_ptree;
+    boost::property_tree::ptree film_7_ptree;
+
+    film_1_ptree.put("", "https://swapi.co/api/films/1/");
+    film_1_ptree.put("", "https://swapi.co/api/films/3/");
+    film_1_ptree.put("", "https://swapi.co/api/films/6/");
+    film_1_ptree.put("", "https://swapi.co/api/films/10/");
+
+    boost::property_tree::ptree films_ptree;    
+    films_ptree.push_back(std::make_pair("", film_1_ptree));
+    // films_ptree.push_back(std::make_pair("", film_3_ptree));
+    // films_ptree.push_back(std::make_pair("", film_6_ptree));
+    // films_ptree.push_back(std::make_pair("", film_7_ptree));
+
+    leia_ptree.add_child("films", films_ptree);
+
+    std::stringstream result;
+    boost::property_tree::write_json(result, leia_ptree);
+    std::cout << result.str() << std::endl;
+
+    return 0;
+}
+
+/*
+{
+	"name": "Leia Organa",
+	"height": "150",
+	"mass": "49",
+	"hair_color": "brown",
+	"skin_color": "light",
+	"eye_color": "brown",
+	"birth_year": "19BBY",
+	"gender": "female",
+	"homeworld": "https://swapi.co/api/planets/2/",
+	"films": [
+		"https://swapi.co/api/films/2/",
+		"https://swapi.co/api/films/6/",
+		"https://swapi.co/api/films/3/",
+		"https://swapi.co/api/films/1/",
+		"https://swapi.co/api/films/7/"
+	],
+	"species": [
+		"https://swapi.co/api/species/1/"
+	],
+	"vehicles": [
+		"https://swapi.co/api/vehicles/30/"
+	],
+	"starships": [],
+	"created": "2014-12-10T15:20:09.791000Z",
+	"edited": "2014-12-20T21:17:50.315000Z",
+	"url": "https://swapi.co/api/people/5/"
+}
+*/
