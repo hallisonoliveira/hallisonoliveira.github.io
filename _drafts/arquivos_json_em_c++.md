@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Leitura e gravação de arquivos JSON em C++
-img: 
+img: json_cpp_boost.png
 category: C++
 tags: [
     C++,
@@ -89,185 +89,86 @@ Para acesso ao item da lista, precisamos utilizar o *second* do objeto. Ele é u
 
 ## Gravação
 
-Para exemplificar a gravação, vamos adicionar mais algumas informações no arquivo JSON utilizado acima. 
+Para exemplificar a gravação, vamos adicionar mais algumas informações no arquivo JSON utilizado acima. As informações que vamos adicionar são referentes à irmâ do *Luke Skywalker*, a princesa *Leia Organa*. Vamos utilizar algumas informações também disponíveis na [StarWars API](https://swapi.co/). O JSON completo disponível no site é o apresentado abaixo:
 
+<script src="https://gist.github.com/hallisonoliveira/efa651bd9b4e8185e797e1a82377cfd9.js"></script>
 
+Vamos adicionar um novo nó no JSON utilizado no exemplo acima de leitura do arquivo. Esse nó terá as seguintes informações:
 
-========================================================================================================
-/*
-boost::filesystem::path lr_camera_file("/home/holiveira/Desenvolvimento/cameras_lr.json");
-    boost::filesystem::path camera("/home/holiveira/Desenvolvimento/cameras.json");
+* Nome (name)
+* Altura (height)
+* Cor dos cabelos (hair_color)
+* Cor dos olhos (eye_color)
+* Lista de filmes (films)
 
-    boost::property_tree::ptree lr_camera;
-    boost::property_tree::ptree cameras_closer;
+Primeiro, criamos o objeto *ptree* que será a raiz desse novo item.
 
-    boost::property_tree::read_json(lr_camera_file.string(), lr_camera);
-    boost::property_tree::read_json(camera.string(), cameras_closer);
+~~~cpp
+boost::property_tree::ptree leia_ptree;
+~~~
 
+Em seguida, adicionamos as informações de nome, altura, cor dos cabelos e cor dos olhos. Esses itens podem ser adicionados diretamente, já que serão atributos simples dentro do JSON e ficarão direto na raiz do novo elemento.
 
-    cout << "iniciando" << endl;
-    BOOST_FOREACH(boost::property_tree::ptree::value_type &lr_binds_node, lr_camera.get_child("camera.binds"))
-    {
-        boost::property_tree::ptree &lr_bind_pt = lr_binds_node.second;
-        // Percorre a lista de cameras estreitas
-        cout << "1" << endl;
-        BOOST_FOREACH(boost::property_tree::ptree::value_type &closer_node, cameras_closer.get_child("cameras.closer"))
-        {
-            boost::property_tree::ptree &closer_pt = closer_node.second;
+~~~cpp
+leia_ptree.put("name", "Leia Organa");
+leia_ptree.put("height", 150);
+leia_ptree.put("hair_color", "brown");
+leia_ptree.put("eye_color", "brown");
+~~~
 
-            cout << "ID " << closer_pt.get<std::string>("id") << endl;
+Observe que adicionamos dois tipos de objetos acima. Os atributos nome, cor dos cabelos e cor dos olhos são do tipo *String* e o atributo altura é do tipo *int*.
 
-            cout << "1" << endl;
+Para a adição da lista de filmes, é necessário primeiro criar um [vetor](http://www.cplusplus.com/reference/vector/vector/) de *String* para facilitar o mapeamento dos elementos que serão adicionados à lista do JSON.
 
+~~~cpp
+std::vector<std::string> films;
+~~~
 
-            if (boost::iequals(lr_camera.get<std::string>("camera.id"), closer_pt.get<std::string>("id")))
-            {
-                BOOST_FOREACH(boost::property_tree::ptree::value_type &binds_node, closer_pt.get_child("binds"))
-                {
-                    boost::property_tree::ptree &bind_pt = binds_node.second;
-                    if (boost::iequals(lr_bind_pt.get<std::string>("name"), bind_pt.get<std::string>("name")))
-                    {
-                        cout << "Adicionando..." << endl;
-                        cameras_closer.push_back(std::make_pair("crop", lr_bind_pt.get_child("crop")));
-                    }
-                }
-            }
-        }
-    }
-*/
+Adicionamos os elementos utilizando o método [push_back](http://www.cplusplus.com/reference/vector/vector/push_back/) do *vector*.
 
-============================================================================================
+~~~cpp
+films.push_back("https://swapi.co/api/films/1/");
+films.push_back("https://swapi.co/api/films/2/");
+films.push_back("https://swapi.co/api/films/3/");
+films.push_back("https://swapi.co/api/films/6/");
+films.push_back("https://swapi.co/api/films/7/");
+~~~
 
-void create_json_from_files_of_folder()
-{
-    using namespace boost::filesystem;
-    using namespace std;
+Agora, criamos o objeto *ptree* referente à lista de filmes.
 
-    namespace pt = boost::property_tree;
+~~~cpp
+boost::property_tree::ptree films_ptree;
+~~~
 
-    path p("/home/holiveira/Desenvolvimento/distropk/issues/dcs/certs/");
+Com o uso do [Foreach](https://theboostcpplibraries.com/boost.foreach) do *Boost*, percorremos o *vector* de filmes, adicionando-os no *ptree*.
 
-    std::stringstream result;
+~~~cpp
+BOOST_FOREACH(auto film, films) {
+    boost::property_tree::ptree film_ptree;
+    film_ptree.put("", film);
 
-    if(exists(p))
-    {
-        vector<path> files_vector;
-
-        copy(directory_iterator(p), directory_iterator(), back_inserter(files_vector));
-
-        pt::ptree certs_tree;
-
-        pt::ptree files_tree;
-        for (vector<path>::const_iterator it(files_vector.begin()), it_end(files_vector.end()); it != it_end; ++it)
-        {
-            path file(*it);
-
-            boost::posix_time::ptime last_modified_time = boost::posix_time::from_time_t(last_write_time(file));
-            std::string last_modified = boost::lexical_cast<std::string>(last_modified_time.date());
-
-            std::string filename = file.filename().c_str();
-            int size_file = file_size(file);
-
-            cout << "Filename: " << filename << endl;
-            cout << "Size: " << size_file << endl;
-            cout << "Last Modified: " << last_modified << endl;
-
-            pt::ptree file_tree;
-            file_tree.put("filename", filename);
-            file_tree.put("size", size_file);
-            file_tree.put("last_modified", last_modified);
-
-            files_tree.push_back(std::make_pair("", file_tree));
-        }
-        certs_tree.push_back(std::make_pair("files", files_tree));
-
-        pt::write_json(result, certs_tree, false);
-
-        cout << result.str() << endl;
-    }
-    else
-    {
-        cout << "Diretorio nao encontrado." << endl;
-    }
-
+    films_ptree.push_back(std::make_pair("", film_ptree));
 }
+~~~
+
+Criado o *ptree* de filmes, basta adiciona-lo ao *ptree* principal, passando a chave "films" como identificador desse novo nó da árvore.
+
+~~~cpp
+leia_ptree.add_child("films", films_ptree);
+~~~
+
+Agora, adicionamos essa nova informação ao arquivo JSON utilizado anteriormente. Para isso, precisamos abrir o arquivo e atribuir seu conteúdo à um objeto *ptree*, da mesma forma que fizemos na seção de leitura de arquivos.
+
+~~~cpp
+boost::property_tree::ptree luke_ptree;
+boost::property_tree::read_json("luke_skywalker.json", luke_ptree);
+~~~
+
+No conteúdo do arquivo, adicionamos o novo nó da árvore de atributos. Por se tratar das informações da irmã do *Luke Skywalker*, vamos chamar esse novo nó de *sister*.
+
+~~~cpp
+luke_ptree.put_child("sister", leia_ptree);
+~~~
 
 
-GRAVAÇÂO
-
-#include <iostream>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
-
-#include <boost/foreach.hpp>
-
-int main() {
-    
-    // Definição dos atributos
-    std::string name = "Leia Organa";
-    int height = 150;
-    std::string hair_color = "brown";
-    std::string eye_color = "brown";
-
-    boost::property_tree::ptree leia_ptree;
-
-    leia_ptree.put("name", name);
-    leia_ptree.put("height", height);
-    leia_ptree.put("hair_color", hair_color);
-    leia_ptree.put("eye_color", eye_color);
-
-    boost::property_tree::ptree film_1_ptree;
-    boost::property_tree::ptree film_3_ptree;
-    boost::property_tree::ptree film_6_ptree;
-    boost::property_tree::ptree film_7_ptree;
-
-    film_1_ptree.put("", "https://swapi.co/api/films/1/");
-    film_1_ptree.put("", "https://swapi.co/api/films/3/");
-    film_1_ptree.put("", "https://swapi.co/api/films/6/");
-    film_1_ptree.put("", "https://swapi.co/api/films/10/");
-
-    boost::property_tree::ptree films_ptree;    
-    films_ptree.push_back(std::make_pair("", film_1_ptree));
-    // films_ptree.push_back(std::make_pair("", film_3_ptree));
-    // films_ptree.push_back(std::make_pair("", film_6_ptree));
-    // films_ptree.push_back(std::make_pair("", film_7_ptree));
-
-    leia_ptree.add_child("films", films_ptree);
-
-    std::stringstream result;
-    boost::property_tree::write_json(result, leia_ptree);
-    std::cout << result.str() << std::endl;
-
-    return 0;
-}
-
-/*
-{
-	"name": "Leia Organa",
-	"height": "150",
-	"mass": "49",
-	"hair_color": "brown",
-	"skin_color": "light",
-	"eye_color": "brown",
-	"birth_year": "19BBY",
-	"gender": "female",
-	"homeworld": "https://swapi.co/api/planets/2/",
-	"films": [
-		"https://swapi.co/api/films/2/",
-		"https://swapi.co/api/films/6/",
-		"https://swapi.co/api/films/3/",
-		"https://swapi.co/api/films/1/",
-		"https://swapi.co/api/films/7/"
-	],
-	"species": [
-		"https://swapi.co/api/species/1/"
-	],
-	"vehicles": [
-		"https://swapi.co/api/vehicles/30/"
-	],
-	"starships": [],
-	"created": "2014-12-10T15:20:09.791000Z",
-	"edited": "2014-12-20T21:17:50.315000Z",
-	"url": "https://swapi.co/api/people/5/"
-}
-*/
+*Background da imagem do post: <a href="https://pixabay.com/pt/users/JAKO5D-2733400/?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=image&amp;utm_content=1627322">JAKO5D</a> por <a href="https://pixabay.com/pt/?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=image&amp;utm_content=1627322">Pixabay</a>*
