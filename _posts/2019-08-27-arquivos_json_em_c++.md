@@ -19,9 +19,9 @@ Esse artigo explica como fazer a leitura e gravação de arquivos JSON em C++ ut
 
 O [Boost](https://www.boost.org/) é uma variada coleção de bibliotecas que estendem o C++, deixando-o ainda mais poderoso. Para a leitura e gravação de arquivos JSON, podemos utilizar a biblioteca **Property Tree** presente no Boost. Essa biblioteca fornece uma estrutura de dados que armazena uma árvore de valores no formato de chave e valor, onde os valores podem ser textos, números ou até mesmo uma lista ou nova árvore.
 
-Lembrando que a Property Tree pode ser utilizada também para leitura e gravação de arquivos XML e INI.
+Lembrando que a *Property Tree* pode ser utilizada também para leitura e gravação de arquivos XML e INI.
 
-Abaixo, um exemplo de como é possível ler um arquivo JSON com o Boost::Property_Tree.
+Abaixo, um exemplo de como é possível ler um arquivo JSON com o *Boost::Property_Tree*.
 
 ## Leitura
 
@@ -37,13 +37,11 @@ No gist abaixo, está o código completo para realizar a leitura do arquivo JSON
 
 ### Explicando por partes
 
-Primeiro, criamos um objeto do tipo **ptree** que receberá o conteúdo do arquivo para que possamos manipula-lo.
+Primeiro, criamos um objeto do tipo **ptree** que receberá o conteúdo do arquivo para que possamos manipula-lo. Precisamos importar a biblioteca **boost/property_tree/ptree.hpp** para isso.
 
 ~~~cpp
 boost::property_tree::ptree luke_ptree;
 ~~~
-
-Precisamos importar a biblioteca **boost/property_tree/ptree.hpp** para isso.
 
 Criado o objeto, adicionamos o conteúdo do arquivo à ele utilizando o método [read_json](https://www.boost.org/doc/libs/1_65_1/doc/html/boost/property_tree/json_parser/read_json_idp699443552.html) presente na biblioteca **boost/property_tree/json_parser.hpp**.
 
@@ -51,15 +49,17 @@ Criado o objeto, adicionamos o conteúdo do arquivo à ele utilizando o método 
 boost::property_tree::read_json("luke_skywalker.json", luke_ptree);
 ~~~
 
-Esse método precisa de dois parâmetros. O primeiro é uma String referente ao nome do arquivo JSON a ser lido. O segundo parâmetro é o objeto *ptree* que receberá o conteúdo. Nesse processo, o conteúdo é traduzido para o formato de chave/valor.
+Esse método precisa de dois parâmetros. O primeiro é uma *String* referente ao nome do arquivo JSON a ser lido. O segundo parâmetro é o objeto *ptree* que receberá o conteúdo. Nesse processo, o conteúdo é traduzido para o formato de chave/valor.
 
 Com isso, já podemos acessar o conteúdo do arquivo através do *ptree*. Basta utilizar o método *get* especificando o tipo de dado a ser lido. No código de exemplo, fazemos a leitura de uma *String* e um inteiro.
 
 ~~~cpp
+// String
 luke_ptree.get<std::string>("name")
 ~~~
 
 ~~~cpp
+// int
 luke_ptree.get<int>("height")
 ~~~
 
@@ -101,7 +101,7 @@ Vamos adicionar um novo nó no JSON utilizado no exemplo acima de leitura do arq
 * Cor dos olhos (eye_color)
 * Lista de filmes (films)
 
-Primeiro, criamos o objeto *ptree* que será a raiz desse novo item.
+Primeiro, criamos o objeto *ptree* que será a raiz desse novo item (biblioteca **boost/property_tree/ptree.hpp**).
 
 ~~~cpp
 boost::property_tree::ptree leia_ptree;
@@ -116,9 +116,9 @@ leia_ptree.put("hair_color", "brown");
 leia_ptree.put("eye_color", "brown");
 ~~~
 
-Observe que adicionamos dois tipos de objetos acima. Os atributos nome, cor dos cabelos e cor dos olhos são do tipo *String* e o atributo altura é do tipo *int*.
+Observe que adicionamos dois tipos de objetos. Os atributos nome, cor dos cabelos e cor dos olhos são do tipo *String* e o atributo altura é do tipo *int*.
 
-Para a adição da lista de filmes, é necessário primeiro criar um [vetor](http://www.cplusplus.com/reference/vector/vector/) de *String* para facilitar o mapeamento dos elementos que serão adicionados à lista do JSON.
+Para a adição da lista de filmes, é necessário primeiro criar um [vector](http://www.cplusplus.com/reference/vector/vector/) de *String* para facilitar o mapeamento dos elementos que serão adicionados à lista do JSON.
 
 ~~~cpp
 std::vector<std::string> films;
@@ -164,11 +164,37 @@ boost::property_tree::ptree luke_ptree;
 boost::property_tree::read_json("luke_skywalker.json", luke_ptree);
 ~~~
 
-No conteúdo do arquivo, adicionamos o novo nó da árvore de atributos. Por se tratar das informações da irmã do *Luke Skywalker*, vamos chamar esse novo nó de *sister*.
+No *ptree* referente ao conteúdo do arquivo, adicionamos o novo nó da árvore de atributos. Por se tratar das informações da irmã do *Luke Skywalker*, vamos chamar esse novo nó de *sister*.
 
 ~~~cpp
 luke_ptree.put_child("sister", leia_ptree);
 ~~~
 
+Agora, basta gravar o arquivo utilizando o novo conteúdo. para isso, utilizamos a função [write_json](https://www.boost.org/doc/libs/1_71_0/doc/html/boost/property_tree/json_parser/write__1_3_33_10_5_1_1_1_3.html), presente na biblioteca **boost/property_tree/json_parser.hpp**. Essa função traduz o conteúdo do *ptree* para um *stream* de saída, podendo ser um arquivo através do nome ou um [stringstream](http://www.cplusplus.com/reference/sstream/stringstream/), caso seja necessário trabalhar com o conteúdo após a conversão para o formato JSON.
 
-*Background da imagem do post: <a href="https://pixabay.com/pt/users/JAKO5D-2733400/?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=image&amp;utm_content=1627322">JAKO5D</a> por <a href="https://pixabay.com/pt/?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=image&amp;utm_content=1627322">Pixabay</a>*
+Abaixo, o uso da função *write_json* para gravação em arquivo:
+
+~~~cpp
+boost::property_tree::write_json("luke_skywalker.json", luke_ptree);
+~~~
+
+Essa função recebe dois parâmetros. O primeiro é o nome do arquivo a ser gravado e o segundo é o objeto *ptree* a ser convertido. Perceba que utilizamos o nome de um arquivo que já existe. Nesse caso, todo o conteúdo será substituido. Se o arquivo não existir, ele é criado.
+
+Conforme comentado anteriormente, com o uso do *stringstream*, podemos utilizar essa função apenas para converter o *ptree* para o formato JSON e continuar trabalhando com ele. O trecho de código abaixo demonstra como podemos faze-lo:
+
+~~~cpp
+std::stringstream result;
+boost::property_tree::write_json(result, luke_ptree);
+std::cout << result.str() << std::endl;
+~~~
+
+Nesse caso, criamos um objeto *stringstream* e passamos ele como primeiro parâmetro da função *write_json*. A conversão do *ptree* para JSON é feita da mesma forma. Em seguida, imprimimos o resultado no console.
+
+No *gist* abaixo, está o código completo do exemplo de gravação em arquivo:
+
+<script src="https://gist.github.com/hallisonoliveira/8850d8dda0b93cb9268438fc810c31b5.js"></script>
+
+E esse é o JSON gerado ao final da execução. O conteúdo recém criado está no final do arquivo.
+
+<script src="https://gist.github.com/hallisonoliveira/c51e7e5c38dcb81e94d639a8a86fcf95.js"></script>
+
