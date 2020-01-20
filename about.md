@@ -6,9 +6,11 @@ footer: true
 ---
 <h3>Hallison Alves Lima de Oliveira</h3>
 
-Sou bacharel em Sistemas de Informação formado pelo Centro Universitário Autônomo do Brasil - UniBrasil e aluno do curso de pós-graduação em App Development da Pontifícia Universidade Católica do Paraná - PUCPR. Atuo como Desenvolvedor de Software utilizando principalmente as linguagens C++, Java e Python em uma companhia multinacional brasileira.
+Sou bacharel em Sistemas de Informação formado pelo Centro Universitário Autônomo do Brasil - UniBrasil e aluno do curso de pós-graduação em App Development da Pontifícia Universidade Católica do Paraná - PUCPR. Atuo como desenvolvedor Android nativo utilizando a linguagem Kotlin, arquitetura limpa e Git.
 
-Minhas principais areas de interesse incluem desenvolvimento de aplicativos nativos e híbridos para dispositivos móveis e desenvolvimento de software para ambientes embarcados. Além disso, estou voltando meus estudos para as areas de inteligência artificial e redes neurais.
+Possuo experiência também em desenvolvimento de software para ambientes Linus utilizando as linguagens C++, Java e Python.
+
+Minhas principais areas de interesse incluem desenvolvimento de aplicativos nativos e híbridos para dispositivos móveis e desenvolvimento de software para ambientes embarcados.
 
 Entre em contato!
 
