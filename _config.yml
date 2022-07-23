@@ -23,4 +23,4 @@ plugins:
 plugins: [jekyll-paginate, jekyll-seo-tag]
 
 # Google Analytics
-google_analytics: UA—145249329-1
+google_analytics: "G-11GCXLC7Y0"
