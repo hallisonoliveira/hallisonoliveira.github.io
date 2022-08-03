@@ -3,6 +3,7 @@ layout: default
 ---
 <div class="row">
   <div class="col-md-10">
+
     <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
       <header class="post-header">
         <p class="post-meta pull-left">{{ page.category | truncate: 25}}</p>
@@ -16,22 +17,50 @@ layout: default
       <div class="post-content" itemprop="articleBody">
         <div class="post-image">
           <img width="50%" src="{{site.baseurl}}/images/{{page.img}}" alt="{{page.title}}">
-        </div>  
+        </div>
         <h2 class="post-title" itemprop="name headline">{{ page.title }}</h2>
         {{ content }}
       </div>
+
+      {% if page.series_main %}
+          <div class="row">
+            <ul>
+                {% for post in site.posts %}
+                    {% if post.series_main == page.serie %}
+                        <li><a class="next" href="{{post.url | prepend: site.baseurl}}">{{ post.title }}</a></li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+          </div>
+      {% endif %}
     </article>
-    <div class="row">
-      <ul class="pager">
-        {% if page.next.url %}
-        <li><a class="next" href="{{page.next.url | prepend: site.baseurl}}">&laquo; {{page.next.title}}</a></li>
-        {% endif %}
-        {% if page.previous.url %}
-        <li><a class="previous" href="{{page.previous.url | prepend: site.baseurl}}">{{page.previous.title}} &raquo;</a>
-        </li>
-        {% endif %}
-      </ul>
-    </div>
+
+    {% if page.series %}
+        {% for post in site.posts %}
+            {% if page.series == post.series_main %}
+                <div class="row">
+                    <ul class="pager">
+                        <li><a class="previous" href="{{post.url | prepend: site.baseurl}}">&laquo; {{post.title}}</a></li>
+                    </ul>
+                </div>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+    {% if page.single %}
+        <div class="row">
+          <ul class="pager">
+            {% if page.next.url and page.next.single %}
+                <li><a class="next" href="{{page.next.url | prepend: site.baseurl}}">&laquo; {{page.next.title}}</a></li>
+            {% endif %}
+            {% if page.previous.url and page.previous.single %}
+                <li><a class="previous" href="{{page.previous.url | prepend: site.baseurl}}">{{page.previous.title}} &raquo;</a>
+                </li>
+            {% endif %}
+          </ul>
+        </div>
+    {% endif %}
+
     <div class="row">
         {% include disqus.html %}
     </div>
