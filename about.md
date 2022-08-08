@@ -6,7 +6,9 @@ footer: true
 ---
 <h3>Hallison Alves Lima de Oliveira</h3>
 
-Sou bacharel em Sistemas de Informação formado pelo Centro Universitário Autônomo do Brasil - UniBrasil e aluno do curso de pós-graduação em App Development da Pontifícia Universidade Católica do Paraná - PUCPR. Atuo como desenvolvedor Android nativo com Kotlin, arquitetura limpa, Git e metodologia Scrum.
+Sou bacharel em Sistemas de Informação formado pelo Centro Universitário Autônomo do Brasil - UniBrasil e especialista em desenvolvimento de aplicativos móveis pela Pontifícia Universidade Católica do Paraná - PUCPR, curso *App Development*. Atuo como desenvolvedor Android nativo utilizando as linguagens Kotlin e Java, sempre aplicando as melhores práticas de programação e princípios <a href="{{ site.baseurl }}/posts/solid.html">SOLID</a>.
+
+Possuo familiaridade na implementação de sistemas utilizando arquitetura limpa e arquiteturas MVVM e MVP como arquiteturas de apresentação em aplicações mobile.
 
 Possuo experiência também em desenvolvimento de software para ambientes Linux utilizando as linguagens C++, Java e Python.
 
