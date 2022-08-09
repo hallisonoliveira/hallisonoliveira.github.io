@@ -40,7 +40,11 @@ jobs:
         id: pages
         uses: actions/jekyll-build-pages@v1
       - name: Upload artifact
-        uses: actions/upload-artifact@main # This will automatically upload an artifact from the '/_site' directory
+        uses: actions/upload-artifact@main
+        with:
+          name: github-pages
+          path: /home/runner/work/_temp/artifact.tar
+          retention-days: 1
 
   # Deployment job
   deploy:
