@@ -7,10 +7,14 @@ layout: default
     <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
       <header class="post-header">
         <p class="post-meta pull-left">{{ page.category | truncate: 25}}</p>
-        <p class="post-meta pull-right"><time datetime="{{ page.date | date_to_xmlschema }}"
-            itemprop="datePublished">{{ page.date | date: "%b %-d, %Y" }}</time>{% if page.author %} • <span
-            itemprop="author" itemscope itemtype="http://schema.org/Person"><span
-              itemprop="name">{{ page.author }}</span></span>{% endif %}</p>
+        <p class="post-meta pull-right">
+            <time datetime="{{ page.date | date_to_xmlschema }}" itemprop="datePublished">{{ page.date | date: "%b %-d, %Y" }}</time>
+            {% if page.author %}
+                <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+                    <span itemprop="name">{{ page.author }}</span>
+                </span>
+            {% endif %}
+        </p>
         <br />
       </header>
 
@@ -25,14 +29,15 @@ layout: default
       {% if page.series_main %}
           <div class="row">
             <ul>
-                {% for post in site.posts reversed %}
-                    {% if post.series_main == page.serie %}
-                        <li><a class="next" href="{{post.url | prepend: site.baseurl}}">{{ post.title }}</a></li>
+                {% for subpost in site.posts reversed %}
+                    {% if page.series_main == subpost.series %}
+                        <li><a class="next" href="{{subpost.url | prepend: site.baseurl}}">{{ subpost.title }}</a></li>
                     {% endif %}
                 {% endfor %}
             </ul>
           </div>
       {% endif %}
+
     </article>
 
     {% if page.series %}
@@ -51,10 +56,13 @@ layout: default
         <div class="row">
           <ul class="pager">
             {% if page.next.url and page.next.single %}
-                <li><a class="next" href="{{page.next.url | prepend: site.baseurl}}">&laquo; {{page.next.title}}</a></li>
+                <li>
+                    <a class="next" href="{{page.next.url | prepend: site.baseurl}}">&laquo; {{page.next.title}}</a>
+                </li>
             {% endif %}
             {% if page.previous.url and page.previous.single %}
-                <li><a class="previous" href="{{page.previous.url | prepend: site.baseurl}}">{{page.previous.title}} &raquo;</a>
+                <li>
+                    <a class="previous" href="{{page.previous.url | prepend: site.baseurl}}">{{page.previous.title}} &raquo;</a>
                 </li>
             {% endif %}
           </ul>
