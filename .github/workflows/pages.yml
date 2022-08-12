@@ -39,9 +39,12 @@ jobs:
       - name: Setup Pages
         id: pages
         uses: actions/jekyll-build-pages@v1
-      - run: bundle exec jekyll build --baseurl ${{ steps.pages.outputs.base_path }} # defaults output to '/_site'
       - name: Upload artifact
-        uses: actions/upload-artifact@main # This will automatically upload an artifact from the '/_site' directory
+        uses: actions/upload-artifact@main
+        with:
+          name: github-pages
+          path: /home/runner/work/_temp/artifact.tar
+          retention-days: 1
 
   # Deployment job
   deploy:
