@@ -13,6 +13,7 @@ tags: [
     aberto fechado
 ]
 comments: true
+hidden: true
 ---
 Em inglês, *Open Closed Principle*.
 

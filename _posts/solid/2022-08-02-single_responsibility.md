@@ -13,6 +13,7 @@ tags: [
     responsabilidade unica
 ]
 comments: true
+hidden: true
 ---
 
 Em inglês, *Single Responsibility Principle*.

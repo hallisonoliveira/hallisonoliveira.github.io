@@ -29,18 +29,7 @@ title: Home
                         </div>
 
                         <div class="panel-body">
-                            {% if post.series_main %}
-
-                                <small>{{ post.excerpt | strip_html | strip_newlines | truncate: 100 }}</small>
-
-                                {% for subpost in paginator.posts reversed %}
-                                    {% if post.series_main == subpost.series %}
-                                        <li><a class="next" href="{{ subpost.url | prepend: site.baseurl }}">{{ subpost.title }}</a></li>
-                                    {% endif %}
-                                {% endfor %}
-                            {% else %}
-                                <small>{{ post.excerpt | strip_html | strip_newlines | truncate: 180 }}</small>
-                            {% endif %}
+                            <small>{{ post.excerpt | strip_html | strip_newlines | truncate: 180 }}</small>
                         </div>
 
                         <div class="panel-body">

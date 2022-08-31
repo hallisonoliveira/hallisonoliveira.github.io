@@ -13,6 +13,7 @@ tags: [
     substituição de liskov
 ]
 comments: true
+hidden: true
 ---
 
 ## Um pouco de história

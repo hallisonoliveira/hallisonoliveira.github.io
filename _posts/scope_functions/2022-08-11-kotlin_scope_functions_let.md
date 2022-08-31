@@ -10,6 +10,7 @@ tags: [
     let
 ]
 comments: true
+hidden: true
 ---
 
 Aproveitando o exemplo apresentado na documentação do Kotlin, um uso comum do `let` é o apresentado abaixo:
