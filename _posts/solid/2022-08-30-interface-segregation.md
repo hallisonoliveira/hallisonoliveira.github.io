@@ -16,6 +16,8 @@ comments: true
 hidden: true
 ---
 
+Em inglês, *Interface Segregation Principle*.
+
 # Interfaces
 
 Antes de falarmos sobre esse princípio, é importante entendermos o que é interface:
