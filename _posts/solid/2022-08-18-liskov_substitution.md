@@ -16,6 +16,8 @@ comments: true
 hidden: true
 ---
 
+Em inglês, *Liskov Substitution Principle*.
+
 ## Um pouco de história
 
 Esse princípio vem do notável trabalho de [Bárbara Liskov](https://en.wikipedia.org/wiki/Barbara_Liskov), cientista da computação, que foi pioneira em diversas contribuições para a ciência da computação e computação distribuída.

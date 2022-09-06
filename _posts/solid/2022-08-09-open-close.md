@@ -3,6 +3,7 @@ layout: post
 title: O - Princípio Aberto/Fechado
 img: solid/open_close.png
 category: SOLID
+permalink: /posts/open_close_principle.html
 series: solid
 tags: [
     solid,
