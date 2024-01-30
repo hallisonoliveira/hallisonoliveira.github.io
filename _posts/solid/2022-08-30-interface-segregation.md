@@ -3,6 +3,7 @@ layout: post
 title: I - Princípio da Segregação de Interface
 img: solid/interface_segregation.png
 category: SOLID
+permalink: /posts/interface_segregation.html
 series: solid
 tags: [
     solid,
