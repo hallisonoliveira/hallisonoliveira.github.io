@@ -35,4 +35,4 @@ No HaloVintage, levamos a privacidade dos usuários a sério e estamos compromet
 
 Ao utilizar o aplicativo HaloVintage, você concorda com os termos desta política de privacidade. Caso não concorde com algum aspecto desta política, recomendamos que pare de utilizar nosso aplicativo.
 
-Última atualização: 17 de Julho de 2023
+Última atualização: 14 de fevereiro de 2024
