@@ -1,18 +1,16 @@
 ---
 layout: page
-title: Sobre
+title: Hallison Alves Lima de Oliveira
 permalink: /about/
 footer: true
 ---
-<h3>Hallison Alves Lima de Oliveira</h3>
+Olá! Meu nome é Hallison, sou desenvolvedor de software com mais de 10 anos de experiência. Iniciei minha carreira trabalhando com as liguagens Java, C e C++ no desenvolvimento de sistemas embarcados, com foco em soluções de baixo nível e alta performance.
 
-Sou bacharel em Sistemas de Informação formado pelo Centro Universitário Autônomo do Brasil - UniBrasil e especialista em desenvolvimento de aplicativos móveis pela Pontifícia Universidade Católica do Paraná - PUCPR, curso *App Development*. Atuo como desenvolvedor Android nativo utilizando as linguagens Kotlin e Java, sempre aplicando as melhores práticas de programação e princípios <a href="{{ site.baseurl }}/posts/solid.html">SOLID</a>.
+Desde 2019, concentro minha atuação no desenvolvimento Android, área onde venho construindo soluções robustas para o setor financeiro. Trabalhei em instituições de pagamento e bancos digitais, passando por uma ampla variedade de produtos bancários — como conta digital, cartões, investimentos, Pix, _onboarding_, núcleos de pagamentos, observabilidade e times de plataforma.
 
-Possuo familiaridade na implementação de sistemas utilizando arquitetura limpa e arquiteturas MVVM e MVP como arquiteturas de apresentação em aplicações mobile.
+Fora do trabalho, tenho interesse por eletrônica e gosto de explorar projetos com Arduino e Raspberry Pi. Também estou expandindo meus conhecimentos em _backend_, aprendendo Docker e a linguagem Go.
 
-Possuo experiência também em desenvolvimento de software para ambientes Linux utilizando as linguagens C++, Java e Python.
-
-Minhas principais areas de interesse incluem desenvolvimento de aplicativos nativos e híbridos para dispositivos móveis e desenvolvimento de software para ambientes embarcados.
+Este blog é meu espaço para compartilhar ideias, aprendizados e experiências técnicas — principalmente no universo do desenvolvimento de software.
 
 Entre em contato!
 
