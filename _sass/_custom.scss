@@ -217,3 +217,45 @@ footer {
     line-height: 1.2;
   }
 }
+
+.highlight .k    { color: #569CD6 !important; } /* keyword */
+.highlight .c    { color: #6A9955; font-style: italic !important; } /* comment */
+.highlight .s    { color: #CE9178 !important; } /* string */
+.highlight .nc   { color: #4EC9B0 !important; } /* class name */
+.highlight .nf   { color: #DCDCAA !important; } /* function name */
+.highlight .o    { color: #D4D4D4 !important; } /* operators */
+
+.page-post .post-content code {
+  background-color: #2a7ae22b;
+  color: #2a7ae2;
+  font-family: Consolas, Monaco, 'Courier New', monospace;
+  font-size: 0.95em;
+  border-radius: 4px;
+}
+
+.page-post .post-content pre {
+  background-color: #1e1e1e;
+  color: #dcdcdc;
+  padding: 16px;
+  overflow-x: auto;
+  border-radius: 16px;
+  font-family: Consolas, Monaco, 'Courier New', monospace;
+  font-size: 0.95em;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.page-post .post-content pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+}
+
+.page-post .post-content pre::-webkit-scrollbar {
+  height: 8px;
+}
+.page-post .post-content pre::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 4px;
+}
