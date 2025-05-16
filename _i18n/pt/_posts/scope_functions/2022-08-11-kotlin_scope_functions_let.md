@@ -1,6 +1,6 @@
 ---
 layout: post
-title: let
+title: Let
 img: kotlin_scope_functions/let.png
 category: Kotlin
 series: "kotlin_scope_functions"

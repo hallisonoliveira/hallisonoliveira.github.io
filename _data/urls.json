@@ -1,14 +1,20 @@
 [
     {
         "title" : "Inicio",
-        "url" : "/"
+        "title_en" : "Home",
+        "url" : "/",
+        "url_en" : "/en"
     },
     {
         "title" : "Posts",
-        "url" : "/posts"
+        "title_en" : "Posts",
+        "url" : "/posts",
+        "url_en" : "/en/posts"
     },
     {
         "title" : "Sobre",
-        "url" : "/about"
+        "title_en" : "About",
+        "url" : "/about",
+        "url_en" : "/en/about"
     }
 ]

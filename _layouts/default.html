@@ -8,18 +8,28 @@ layout: compress
   {% include head.html %}
 
   <body>
-
     {% include sidebar.html %}
-
-    <!-- Wrap is the content to shift when toggling the sidebar. We wrap the
-         content to avoid any CSS collisions with our real content. -->
     <div class="wrap">
       <div class="masthead">
-        <div class="container">
+        <div class="container masthead-flex">
           <h3 class="masthead-title">
             <a href="{{ site.baseurl }}/" title="Home">{{ site.title }}</a>
             <small>{{ site.tagline }}</small>
           </h3>
+
+          <div class="language-switcher">
+            {% if site.lang == "pt" %}
+              {% capture link1 %}{{ site.baseurl_root }}/en{{ page.url}}{% endcapture %}
+              <a href="{{ link1 }}" class="lang-btn {% if site.lang == 'en' %}active{% endif %}">
+                <img src="{{ site.baseurl }}/assets/img/flags/us.svg" alt="English" class="flag-icon">
+              </a>
+            {% elsif site.lang == "en" %}
+              {% capture link2 %}{{ site.baseurl_root }}{{ page.url }}{% endcapture %}
+              <a href="{{ link2 }}" class="lang-btn {% if site.lang == 'pt' %}active{% endif %}">
+                <img src="{{ site.baseurl }}/assets/img/flags/br.svg" alt="Português" class="flag-icon">
+              </a>
+            {% endif %}
+          </div>
         </div>
       </div>
 
