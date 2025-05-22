@@ -1,8 +1,7 @@
 ---
 layout: page
 title: Hallison Alves Lima de Oliveira
-permalink: /sobre/
-permalink_en: /about/
+permalink: /about/
 footer: true
 ---
 

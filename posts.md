@@ -1,9 +1,10 @@
 ---
 layout: page
-title: Lista de Posts
 permalink: /posts
 ---
 <div class="container">
+    <h1>{% t posts.title %}</h1>
+
     {% assign post_list_size = site.posts | size %}
     {%- if post_list_size > 0 -%}
     <ul>
@@ -20,7 +21,7 @@ permalink: /posts
     </ul>
     {% else %}
         <div style="text-align: center">
-            Aguarde... Os posts estão sendo produzidos.
+            {% t posts.no_posts %}
         </div>
     {% endif %}
 </div>
