@@ -1,0 +1,1233 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="pt"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://hallisonoliveira.com.br/feed.xml" rel="self" type="application/atom+xml" /><link href="https://hallisonoliveira.com.br/" rel="alternate" type="text/html" hreflang="pt" /><updated>2025-05-21T21:55:11-03:00</updated><id>https://hallisonoliveira.com.br/feed.xml</id><title type="html">Hallison Oliveira</title><subtitle>Blog de desenvolvimento de software</subtitle><entry><title type="html">Chain Of Responsibility e Builder - Um exemplo prático em Kotlin</title><link href="https://hallisonoliveira.com.br/posts/chain_of_responsibility_and_builder_with_kotlin.html" rel="alternate" type="text/html" title="Chain Of Responsibility e Builder - Um exemplo prático em Kotlin" /><published>2024-01-29T00:00:00-03:00</published><updated>2024-01-29T00:00:00-03:00</updated><id>https://hallisonoliveira.com.br/posts/chain_of_responsibility_and_builder_with_kotlin</id><content type="html" xml:base="https://hallisonoliveira.com.br/posts/chain_of_responsibility_and_builder_with_kotlin.html"><![CDATA[<h1 id="os-design-patterns">Os Design Patterns</h1>
+
+<h2 id="chain-of-responsibility">Chain Of Responsibility</h2>
+
+<p>O <strong><em>Chain of Responsibility</em></strong> (Cadeia de Responsabilidade) é um padrão de projeto que permite organizar objetos em uma sequência hierárquica, onde cada objeto na cadeia tem a capacidade de processar uma solicitação ou passá-la para o próximo nível da hierarquia. Esse padrão é útil quando múltiplos objetos podem lidar com uma solicitação, mas não se sabe antecipadamente qual deles será responsável por processá-la.</p>
+
+<p>Para facilitar o entendimento, podemos ver esse padrão como uma corrente, onde cada elo dessa corrente possui uma referência para o próximo elo e um método para processar a solicitação. Essa solicitação percorre cada elo da corrente até que seja processada por um deles ou chegue ao final da cadeia sem ser tratada. Isso proporciona flexibilidade e desacopla o remetente da solicitação do seu destinatário, tornando o sistema mais modular e fácil de manter.</p>
+
+<p>No exemplo apresentado aqui, cada elo tem uma função que indicará se ele deverá ser executado e uma função com a lógica a ser aplicada. Se o elo deve ser executado, a função com a lógica é chamada. Se o elo não puder ser executado, a execução da corrente continua e o próximo elo será acionado. Há também uma classe responsável por manter a instância de cada elo da corrente e por chamar todos os elos. Se um dos elos for executado, a classe da corrente interrompe a execução e retorna o resultado para quem à chamou.</p>
+
+<p>Esse padrão é muito interessante e é frequentemente utilizado em situações em que há múltiplos manipuladores para um mesmo tipo de solicitação, como em sistemas de processamento de eventos, validações e/ou cálculos para diferentes tipos de dados ou em casos em que o comportamento do sistema pode ser estendido sem a necessidade de modificar o código existente, sendo um recurso muito útil já que precisamos ter sempre em mente os princípios <a href="/posts/solid.html">SOLID</a>.</p>
+
+<h2 id="builder">Builder</h2>
+
+<p>O padrão <strong><em>Builder</em></strong> é um padrão de projeto voltado para a construção de objetos complexos. Ele é útil quando a construção de determinado objeto exige uma grande quantidade de informações ou envolve uma série de lógicas com diversas etapas. Assim, nesses casos, é possível abstrair toda a complexidade da criação do objeto para uma classe separada, responsável apenas pelo processo de criação.</p>
+
+<p>No exemplo apresentado aqui, utilizamos esse padrão para a construção da classe que gerencia a cadeia de regras. Através do <strong><em>Builder</em></strong>, adicionamos as regras à cadeia, com possibilidade de adicionar uma regra padrão, e ao final, recebemos a instância da classe da cadeia.</p>
+
+<h1 id="vamos-ao-código">Vamos ao código</h1>
+
+<p>Para exemplificar o uso dos padrões <strong><em>Chain Of Responsibility</em></strong> e <strong><em>Builder</em></strong>, trago um sistema simples de cálculo de preço de venda de veículos.</p>
+
+<p>Como entrada para esse sistema, fornecemos um determinado veículo com um tipo (carro ou pickup), um fabricante (Chevrolet ou Ford) e um preço de tabela. As regras de cálculo serão aplicadas ao preço de tabela e resultarão num preço final de venda, a ser definido via regras de cálculo.</p>
+
+<p>Para a representação do veículo, temos o <em>data class</em> <code class="language-plaintext highlighter-rouge">Vehicle</code>, com o atributo <code class="language-plaintext highlighter-rouge">type</code> (<em>Enum</em>), que indica se o veículo é um carro (<code class="language-plaintext highlighter-rouge">CAR</code>), uma pickup (<code class="language-plaintext highlighter-rouge">PICKUP</code>) ou um ônibus (<code class="language-plaintext highlighter-rouge">BUS</code>) e o atributo <code class="language-plaintext highlighter-rouge">brand</code> indicando o fabricante, conforme a seguir:</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">data class</span> <span class="nc">Vehicle</span><span class="p">(</span>
+    <span class="kd">val</span> <span class="py">value</span><span class="p">:</span> <span class="nc">Double</span><span class="p">,</span>
+    <span class="kd">val</span> <span class="py">brand</span><span class="p">:</span> <span class="nc">Brand</span><span class="p">,</span>
+    <span class="kd">val</span> <span class="py">type</span><span class="p">:</span> <span class="nc">Type</span>
+<span class="p">)</span>
+
+<span class="k">enum</span> <span class="kd">class</span> <span class="nc">Type</span> <span class="p">{</span>
+    <span class="nc">CAR</span><span class="p">,</span>
+    <span class="nc">PICKUP</span><span class="p">,</span>
+    <span class="nc">BUS</span>
+<span class="p">}</span>
+
+<span class="k">enum</span> <span class="kd">class</span> <span class="nc">Brand</span> <span class="p">{</span>
+    <span class="nc">CHEVROLET</span><span class="p">,</span>
+    <span class="nc">FORD</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Cada combinação de tipo de veículo e fabricante terá uma regra específica para o cálculo de preço de venda. Usaremos o padrão <strong><em>Chain Of Responsibility</em></strong> para gerenciar a aplicação dessas regras. Assim, para cada par tipo + fabricante, teremos uma implementação da classe de regra.</p>
+
+<p>As classes de regra devem seguir o formato definido pela classe abstrata <code class="language-plaintext highlighter-rouge">SellValueCalculationRule</code>, que pode ser vista abaixo:</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">abstract</span> <span class="kd">class</span> <span class="nc">SellValueCalculationRule</span> <span class="p">{</span>
+
+    <span class="k">protected</span> <span class="k">abstract</span> <span class="k">fun</span> <span class="nf">shouldCalculate</span><span class="p">(</span>
+        <span class="n">vehicle</span><span class="p">:</span> <span class="nc">Vehicle</span><span class="p">,</span>
+    <span class="p">):</span> <span class="nc">Boolean</span>
+
+    <span class="k">protected</span> <span class="k">abstract</span> <span class="k">fun</span> <span class="nf">doCalculation</span><span class="p">(</span>
+        <span class="n">vehicle</span><span class="p">:</span> <span class="nc">Vehicle</span><span class="p">,</span>
+    <span class="p">):</span> <span class="nc">Double</span>
+
+    <span class="k">fun</span> <span class="nf">run</span><span class="p">(</span>
+        <span class="n">vehicle</span><span class="p">:</span> <span class="nc">Vehicle</span><span class="p">,</span>
+    <span class="p">)</span> <span class="p">=</span> <span class="k">if</span> <span class="p">(</span><span class="nf">shouldCalculate</span><span class="p">(</span><span class="n">vehicle</span><span class="p">))</span> <span class="p">{</span>
+        <span class="nf">doCalculation</span><span class="p">(</span><span class="n">vehicle</span><span class="p">)</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="k">null</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Essa classe possui três funções:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">shouldCalculate</code> - Essa função recebe um objeto <code class="language-plaintext highlighter-rouge">Vehicle</code> como parâmetro e retorna um <em>Boolean</em>. É nela onde colocamos a lógica que define se a regra deve ser executada ou não. Se a regra deve ser executada, essa função deve retornar <code class="language-plaintext highlighter-rouge">true</code>, se não, ela deve retornar <code class="language-plaintext highlighter-rouge">false</code>. Perceba que ela está marcada como <code class="language-plaintext highlighter-rouge">protected</code>, o que indica que ela não pode ser acessada externamente.</li>
+  <li><code class="language-plaintext highlighter-rouge">doCalculation</code> -  Essa função recebe um objeto <code class="language-plaintext highlighter-rouge">Vehicle</code> como parâmetro e retorna um <em>Double</em>. É nela onde colocamos a implementação da lógica de cálculo da regra. Ou seja, é nessa função onde o cálculo do preço de venda será feito. Perceba que, assim como a função <code class="language-plaintext highlighter-rouge">shouldCalculate</code>, essa função também está marcada como <code class="language-plaintext highlighter-rouge">protected</code>.</li>
+  <li><code class="language-plaintext highlighter-rouge">run</code> - Essa função recebe um objeto <code class="language-plaintext highlighter-rouge">Vehicle</code> como parâmetro e retorna um <em>Double nullable</em>. Essa é a única função que poderá ser acessada externamente e que não terá sua implementação feita pelas classes de regras. Ela faz parte da estrutura da cadeia e é responsável por chamar a função <code class="language-plaintext highlighter-rouge">shouldExecute</code> para verificar se a regra deve ser executada. Se sim, a função <code class="language-plaintext highlighter-rouge">doCalculation</code> é chamada e seu resultado é retornado. Se a função <code class="language-plaintext highlighter-rouge">shouldExecute</code> retornar <code class="language-plaintext highlighter-rouge">false</code> indicando que a regra não deve ser executada, a função <code class="language-plaintext highlighter-rouge">run</code> retornará <code class="language-plaintext highlighter-rouge">null</code>, indicando para a classe <code class="language-plaintext highlighter-rouge">SellValueCalculationChain</code> que a próxima regra deve ser chamada.</li>
+</ul>
+
+<p>A seguir, temos as implementações concretas das regras de cálculo de preço de venda para cada combinação de tipo e fabricante de veículo.</p>
+
+<p>Para veículos do tipo <code class="language-plaintext highlighter-rouge">CAR</code> e fabricante <code class="language-plaintext highlighter-rouge">CHEVROLET</code>:</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">ChevroletCarSellValueCalculationRule</span> <span class="p">:</span> <span class="nc">SellValueCalculationRule</span><span class="p">()</span> <span class="p">{</span>
+
+    <span class="k">override</span> <span class="k">fun</span> <span class="nf">shouldCalculate</span><span class="p">(</span>
+        <span class="n">vehicle</span><span class="p">:</span> <span class="nc">Vehicle</span><span class="p">,</span>
+    <span class="p">)</span> <span class="p">=</span> <span class="n">vehicle</span><span class="p">.</span><span class="n">type</span> <span class="p">==</span> <span class="nc">Type</span><span class="p">.</span><span class="nc">CAR</span> <span class="p">&amp;&amp;</span> <span class="n">vehicle</span><span class="p">.</span><span class="n">brand</span> <span class="p">==</span> <span class="nc">Brand</span><span class="p">.</span><span class="nc">CHEVROLET</span>
+
+    <span class="k">override</span> <span class="k">fun</span> <span class="nf">doCalculation</span><span class="p">(</span><span class="n">vehicle</span><span class="p">:</span> <span class="nc">Vehicle</span><span class="p">):</span> <span class="nc">Double</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">vehicle</span><span class="p">.</span><span class="n">value</span> <span class="p">+</span> <span class="p">((</span><span class="n">vehicle</span><span class="p">.</span><span class="n">value</span> <span class="p">*</span> <span class="nc">CHEVROLET_CAR_INTEREST_VALUE</span><span class="p">)</span> <span class="p">/</span> <span class="mi">100</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="k">companion</span> <span class="k">object</span> <span class="p">{</span>
+        <span class="k">private</span> <span class="k">const</span> <span class="kd">val</span> <span class="py">CHEVROLET_CAR_INTEREST_VALUE</span> <span class="p">=</span> <span class="mf">0.99</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Para veículos do tipo <code class="language-plaintext highlighter-rouge">PICKUP</code> e fabricante <code class="language-plaintext highlighter-rouge">CHEVROLET</code>:</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">ChevroletPickupSellValueCalculationRule</span> <span class="p">:</span> <span class="nc">SellValueCalculationRule</span><span class="p">()</span> <span class="p">{</span>
+
+    <span class="k">override</span> <span class="k">fun</span> <span class="nf">shouldCalculate</span><span class="p">(</span>
+        <span class="n">vehicle</span><span class="p">:</span> <span class="nc">Vehicle</span><span class="p">,</span>
+    <span class="p">)</span> <span class="p">=</span> <span class="n">vehicle</span><span class="p">.</span><span class="n">type</span> <span class="p">==</span> <span class="nc">Type</span><span class="p">.</span><span class="nc">PICKUP</span> <span class="p">&amp;&amp;</span> <span class="n">vehicle</span><span class="p">.</span><span class="n">brand</span> <span class="p">==</span> <span class="nc">Brand</span><span class="p">.</span><span class="nc">CHEVROLET</span>
+
+    <span class="k">override</span> <span class="k">fun</span> <span class="nf">doCalculation</span><span class="p">(</span><span class="n">vehicle</span><span class="p">:</span> <span class="nc">Vehicle</span><span class="p">):</span> <span class="nc">Double</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">vehicle</span><span class="p">.</span><span class="n">value</span> <span class="p">+</span>
+                <span class="p">((</span><span class="n">vehicle</span><span class="p">.</span><span class="n">value</span> <span class="p">*</span> <span class="nc">CHEVROLET_PICKUP_INTEREST_PERCENTAGE_VALUE</span><span class="p">)</span> <span class="p">/</span> <span class="mi">100</span><span class="p">)</span> <span class="p">-</span>
+                <span class="nc">CHEVROLET_PICKUP_DISCOUNT_MONETARY_VALUE</span>
+    <span class="p">}</span>
+
+    <span class="k">companion</span> <span class="k">object</span> <span class="p">{</span>
+        <span class="k">private</span> <span class="k">const</span> <span class="kd">val</span> <span class="py">CHEVROLET_PICKUP_INTEREST_PERCENTAGE_VALUE</span> <span class="p">=</span> <span class="mf">0.49</span>
+        <span class="k">private</span> <span class="k">const</span> <span class="kd">val</span> <span class="py">CHEVROLET_PICKUP_DISCOUNT_MONETARY_VALUE</span> <span class="p">=</span> <span class="mf">1500.00</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Para veículos do tipo <code class="language-plaintext highlighter-rouge">CAR</code> e fabricante <code class="language-plaintext highlighter-rouge">FORD</code>:</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">FordCarSellValueCalculationRule</span> <span class="p">:</span> <span class="nc">SellValueCalculationRule</span><span class="p">()</span> <span class="p">{</span>
+
+    <span class="k">override</span> <span class="k">fun</span> <span class="nf">shouldCalculate</span><span class="p">(</span>
+        <span class="n">vehicle</span><span class="p">:</span> <span class="nc">Vehicle</span><span class="p">,</span>
+    <span class="p">)</span> <span class="p">=</span> <span class="n">vehicle</span><span class="p">.</span><span class="n">type</span> <span class="p">==</span> <span class="nc">Type</span><span class="p">.</span><span class="nc">CAR</span> <span class="p">&amp;&amp;</span> <span class="n">vehicle</span><span class="p">.</span><span class="n">brand</span> <span class="p">==</span> <span class="nc">Brand</span><span class="p">.</span><span class="nc">FORD</span>
+
+    <span class="k">override</span> <span class="k">fun</span> <span class="nf">doCalculation</span><span class="p">(</span>
+        <span class="n">vehicle</span><span class="p">:</span> <span class="nc">Vehicle</span><span class="p">,</span>
+    <span class="p">)</span> <span class="p">=</span> <span class="n">vehicle</span><span class="p">.</span><span class="n">value</span> <span class="p">+</span> <span class="p">((</span><span class="n">vehicle</span><span class="p">.</span><span class="n">value</span> <span class="p">*</span> <span class="nc">CHEVROLET_CAR_INTEREST_VALUE</span><span class="p">)</span> <span class="p">/</span> <span class="mi">100</span><span class="p">)</span>
+
+    <span class="k">companion</span> <span class="k">object</span> <span class="p">{</span>
+        <span class="k">private</span> <span class="k">const</span> <span class="kd">val</span> <span class="py">CHEVROLET_CAR_INTEREST_VALUE</span> <span class="p">=</span> <span class="mf">0.49</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Para veículos do tipo <code class="language-plaintext highlighter-rouge">PICKUP</code> e fabricante <code class="language-plaintext highlighter-rouge">FORD</code>:</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">FordPickupSellValueCalculationRule</span> <span class="p">:</span> <span class="nc">SellValueCalculationRule</span><span class="p">()</span> <span class="p">{</span>
+
+    <span class="k">override</span> <span class="k">fun</span> <span class="nf">shouldCalculate</span><span class="p">(</span>
+        <span class="n">vehicle</span><span class="p">:</span> <span class="nc">Vehicle</span><span class="p">,</span>
+    <span class="p">)</span> <span class="p">=</span> <span class="n">vehicle</span><span class="p">.</span><span class="n">type</span> <span class="p">==</span> <span class="nc">Type</span><span class="p">.</span><span class="nc">PICKUP</span> <span class="p">&amp;&amp;</span> <span class="n">vehicle</span><span class="p">.</span><span class="n">brand</span> <span class="p">==</span> <span class="nc">Brand</span><span class="p">.</span><span class="nc">FORD</span>
+
+    <span class="k">override</span> <span class="k">fun</span> <span class="nf">doCalculation</span><span class="p">(</span>
+        <span class="n">vehicle</span><span class="p">:</span> <span class="nc">Vehicle</span>
+    <span class="p">)</span> <span class="p">=</span> <span class="n">vehicle</span><span class="p">.</span><span class="n">value</span> <span class="p">+</span>
+            <span class="p">((</span><span class="n">vehicle</span><span class="p">.</span><span class="n">value</span> <span class="p">*</span> <span class="nc">FORD_PICKUP_INTEREST_PERCENTAGE_VALUE</span><span class="p">)</span> <span class="p">/</span> <span class="mi">100</span><span class="p">)</span> <span class="p">-</span>
+            <span class="nc">FORD_PICKUP_DISCOUNT_MONETARY_VALUE</span>
+
+    <span class="k">companion</span> <span class="k">object</span> <span class="p">{</span>
+        <span class="k">private</span> <span class="k">const</span> <span class="kd">val</span> <span class="py">FORD_PICKUP_INTEREST_PERCENTAGE_VALUE</span> <span class="p">=</span> <span class="mf">0.69</span>
+        <span class="k">private</span> <span class="k">const</span> <span class="kd">val</span> <span class="py">FORD_PICKUP_DISCOUNT_MONETARY_VALUE</span> <span class="p">=</span> <span class="mf">2000.00</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Por fim, vamos criar uma regra <em>default</em> para demonstrar seu funcionamento:</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">DefaultDiscountCalculationRule</span> <span class="p">:</span> <span class="nc">SellValueCalculationRule</span><span class="p">()</span> <span class="p">{</span>
+
+    <span class="k">override</span> <span class="k">fun</span> <span class="nf">shouldCalculate</span><span class="p">(</span>
+        <span class="n">vehicle</span><span class="p">:</span> <span class="nc">Vehicle</span><span class="p">,</span>
+    <span class="p">)</span> <span class="p">=</span> <span class="k">true</span>
+
+    <span class="k">override</span> <span class="k">fun</span> <span class="nf">doCalculation</span><span class="p">(</span>
+        <span class="n">vehicle</span><span class="p">:</span> <span class="nc">Vehicle</span>
+    <span class="p">)</span> <span class="p">=</span> <span class="n">vehicle</span><span class="p">.</span><span class="n">value</span> <span class="p">-</span> <span class="p">((</span><span class="n">vehicle</span><span class="p">.</span><span class="n">value</span> <span class="p">*</span> <span class="nc">GENERAL_DISCOUNT_PERCENTAGE_VALUE</span><span class="p">)</span> <span class="p">/</span> <span class="mi">100</span><span class="p">)</span>
+
+    <span class="k">companion</span> <span class="k">object</span> <span class="p">{</span>
+        <span class="k">private</span> <span class="k">const</span> <span class="kd">val</span> <span class="py">GENERAL_DISCOUNT_PERCENTAGE_VALUE</span> <span class="p">=</span> <span class="mf">0.1</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Perceba que na função <code class="language-plaintext highlighter-rouge">shouldCalculate</code> de cada regra, é verificado o tipo do veículo e o fabricante, criando a pré condição para que a regra seja executada. Já na classe da regra <em>default</em>, essa função retorna <code class="language-plaintext highlighter-rouge">true</code> diretamente. Assim, garantimos que ela sempre vai executar. Devemos apenas garantir que essa regra seja sempre utilizada apenas como regra <em>default</em>. Se ela for adicionada com as demais regras, a execução da cadeia terá um comportamento inválido, já que ao passar por essa regra, ela sempre será executada, fazendo com que as demais regras - definidas após ela - sejam ignoradas.</p>
+
+<p>Para todas as regras, temos o cálculo em si definidos na função <code class="language-plaintext highlighter-rouge">doCalculation</code>.</p>
+
+<p>Por fim, podemos ver que a função <code class="language-plaintext highlighter-rouge">run</code> não está presente em nenhuma implementação concreta de regra.</p>
+
+<p>Com as regras implementadas, podemos passar para a classe <code class="language-plaintext highlighter-rouge">SellValueCalculationChain</code>, responsável por gerenciar a cadeia de regras. Ela é a representação da corrente de regras e é dentro dela que as regras - os elos da corrente - serão armazenados.</p>
+
+<p>Sua implementação pode ser vista a seguir:</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">SellValueCalculationChain</span> <span class="k">private</span> <span class="k">constructor</span><span class="p">()</span> <span class="p">{</span>
+
+    <span class="k">private</span> <span class="kd">val</span> <span class="py">calculationRules</span><span class="p">:</span> <span class="nc">MutableList</span><span class="p">&lt;</span><span class="nc">SellValueCalculationRule</span><span class="p">&gt;</span> <span class="p">=</span> <span class="nf">mutableListOf</span><span class="p">()</span>
+    <span class="k">private</span> <span class="kd">var</span> <span class="py">defaultCalculationRule</span><span class="p">:</span> <span class="nc">SellValueCalculationRule</span><span class="p">?</span> <span class="p">=</span> <span class="k">null</span>
+
+    <span class="k">fun</span> <span class="nf">addRule</span><span class="p">(</span><span class="n">rule</span><span class="p">:</span> <span class="nc">SellValueCalculationRule</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">calculationRules</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="n">rule</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="k">fun</span> <span class="nf">setDefaultRule</span><span class="p">(</span><span class="n">rule</span><span class="p">:</span> <span class="nc">SellValueCalculationRule</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">defaultCalculationRule</span> <span class="p">=</span> <span class="n">rule</span>
+    <span class="p">}</span>
+
+    <span class="k">fun</span> <span class="nf">run</span><span class="p">(</span><span class="n">vehicle</span><span class="p">:</span> <span class="nc">Vehicle</span><span class="p">):</span> <span class="nc">Double</span> <span class="p">{</span>
+
+        <span class="n">calculationRules</span><span class="p">.</span><span class="nf">forEach</span> <span class="p">{</span> <span class="n">calculationRule</span> <span class="p">-&gt;</span>
+            <span class="kd">val</span> <span class="py">calculationResult</span> <span class="p">=</span> <span class="n">calculationRule</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="n">vehicle</span><span class="p">)</span>
+            <span class="n">calculationResult</span><span class="o">?.</span><span class="nf">run</span> <span class="p">{</span> <span class="k">return</span> <span class="k">this</span> <span class="p">}</span>
+        <span class="p">}</span>
+
+        <span class="n">defaultCalculationRule</span><span class="o">?.</span><span class="nf">run</span> <span class="p">{</span>
+            <span class="kd">val</span> <span class="py">defaultCalculationResult</span> <span class="p">=</span> <span class="nf">run</span><span class="p">(</span><span class="n">vehicle</span><span class="p">)</span>
+            <span class="n">defaultCalculationResult</span><span class="o">?.</span><span class="nf">run</span> <span class="p">{</span> <span class="k">return</span> <span class="k">this</span> <span class="p">}</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">vehicle</span><span class="p">.</span><span class="n">value</span>
+    <span class="p">}</span>
+
+    <span class="kd">object</span> <span class="nc">Builder</span> <span class="p">{</span>
+
+        <span class="k">private</span> <span class="kd">val</span> <span class="py">rules</span><span class="p">:</span> <span class="nc">MutableList</span><span class="p">&lt;</span><span class="nc">SellValueCalculationRule</span><span class="p">&gt;</span> <span class="p">=</span> <span class="nf">mutableListOf</span><span class="p">()</span>
+        <span class="k">private</span> <span class="kd">var</span> <span class="py">defaultRule</span><span class="p">:</span> <span class="nc">SellValueCalculationRule</span><span class="p">?</span> <span class="p">=</span> <span class="k">null</span>
+
+        <span class="k">fun</span> <span class="nf">add</span><span class="p">(</span><span class="n">rule</span><span class="p">:</span> <span class="nc">SellValueCalculationRule</span><span class="p">)</span> <span class="p">=</span> <span class="nf">apply</span> <span class="p">{</span>
+            <span class="n">rules</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="n">rule</span><span class="p">)</span>
+        <span class="p">}</span>
+
+        <span class="k">fun</span> <span class="nf">setDefault</span><span class="p">(</span><span class="n">rule</span><span class="p">:</span> <span class="nc">SellValueCalculationRule</span><span class="p">)</span> <span class="p">=</span> <span class="nf">apply</span> <span class="p">{</span>
+            <span class="n">defaultRule</span> <span class="p">=</span> <span class="n">rule</span>
+        <span class="p">}</span>
+
+        <span class="k">fun</span> <span class="nf">build</span><span class="p">():</span> <span class="nc">SellValueCalculationChain</span> <span class="p">{</span>
+            <span class="kd">val</span> <span class="py">chain</span> <span class="p">=</span> <span class="nc">SellValueCalculationChain</span><span class="p">()</span>
+            <span class="n">rules</span><span class="p">.</span><span class="nf">forEach</span><span class="p">(</span><span class="n">chain</span><span class="o">::</span><span class="n">addRule</span><span class="p">)</span>
+            <span class="n">defaultRule</span><span class="o">?.</span><span class="nf">run</span><span class="p">(</span><span class="n">chain</span><span class="o">::</span><span class="n">setDefaultRule</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">chain</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Nessa classe temos diversos pontos interessantes a serem vistos:</p>
+
+<p>Construtor privado para garantirmos que essa classe não será instanciada sem o uso do <em>Builder</em> (explicado a seguir).</p>
+
+<p>Lista <code class="language-plaintext highlighter-rouge">calculationRules</code> que representa as regras pertencentes à cadeia, ou seja, os elos da corrente.</p>
+
+<p>Função <code class="language-plaintext highlighter-rouge">addRule</code> que será utilizada para adicionar as regras à cadeia, uma por uma. Ao chamar a essa função, a regra passada por parâmetro será adicionada ao fim lista <code class="language-plaintext highlighter-rouge">calculationRules</code>.</p>
+
+<p>Objeto <code class="language-plaintext highlighter-rouge">defaultCalculationRule</code> que representa a regra <em>default</em> da cadeia. Se nenhuma regra presente na lista <code class="language-plaintext highlighter-rouge">calculationRules</code> for executada, a regra <em>default</em> será executada, se estiver definida (≠ null).</p>
+
+<p>Função <code class="language-plaintext highlighter-rouge">setDefaultRule</code> responsável por definir a regra <em>default</em> da cadeia. Ao chamar essa função, a regra passada por parâmetro será definida como valor do objeto <code class="language-plaintext highlighter-rouge">defaultCalculationRule</code>. Como podemos ter apenas uma regra <em>default</em>, se a função for chamada mais de uma vez, o valor do objeto será substituído.</p>
+
+<p>Função <code class="language-plaintext highlighter-rouge">run</code>. Essa função recebe um objeto <code class="language-plaintext highlighter-rouge">Vehicle</code> e retorna um <em>Double</em> e é responsável por chamar todas as regras presentes na lista <code class="language-plaintext highlighter-rouge">calculationRules</code>, uma após a outra, na sequência em que foram adicionadas.</p>
+
+<ul>
+  <li>Se alguma regra for executada (retornar um valor válido diferente de <code class="language-plaintext highlighter-rouge">null</code>), esse valor sera retornado pela função <code class="language-plaintext highlighter-rouge">run</code> imediatamente;</li>
+  <li>Se nenhuma regra for executada, a regra <em>default</em> será chamada e seu resultado será retornado, se ela estiver definida;</li>
+  <li>Se nenhuma regra da lista <code class="language-plaintext highlighter-rouge">calculationRules</code> for executada e não houver uma regra <em>default</em> definida, então apenas retornamos o valor de tabela do veículo recebido como parâmetro.</li>
+</ul>
+
+<p>Dentro da classe <code class="language-plaintext highlighter-rouge">SellValueCalculationChain</code>, temos a classe <em>Builder</em>. Como o nome sugere, essa classe é a implementação do <em>design pattern Builder</em> e é ela a responsável por construir a classe <code class="language-plaintext highlighter-rouge">SellValueCalculationChain</code>. Nela também temos uma lista de regras (<code class="language-plaintext highlighter-rouge">rules</code>) e um objeto que representa a regra <em>default (<code class="language-plaintext highlighter-rouge">defaultRule</code>)</em>.</p>
+
+<p>A lista <code class="language-plaintext highlighter-rouge">rules</code> é uma lista temporária que serve apenas para armazenar as regras durante o processo de criação da instância da classe da cadeia.</p>
+
+<p>Assim como a lista <code class="language-plaintext highlighter-rouge">rules</code>, o objeto <code class="language-plaintext highlighter-rouge">defaultRule</code> também é temporário e serve apenas para armazenada a regra <em>default</em> - se usada - durante o processo de criação da classe da cadeia.</p>
+
+<p>Temos as funções <code class="language-plaintext highlighter-rouge">add</code> para adicionar as regras e <code class="language-plaintext highlighter-rouge">setDefault</code> para definir a regra <em>default</em>.</p>
+
+<p>A função principal aqui é a função <code class="language-plaintext highlighter-rouge">build</code>. Ela não recebe parâmetro algum e retorna uma instância da classe <code class="language-plaintext highlighter-rouge">SellValueCalculationChain</code>. É nela onde está toda a lógica para a criação da classe da cadeia. Quando chamada, ela cria uma instância da classe, adiciona todas as regras presentes na lista <code class="language-plaintext highlighter-rouge">rules</code> do <em>Builder</em> à instância da classe da cadeia, uma por uma e, em seguida, a função define a regra <em>default</em>, se ela estiver definida. Por fim, a função retorna a instância recém criada da classe <code class="language-plaintext highlighter-rouge">SellValueCalculationChain</code> com todas as regras adicionadas.</p>
+
+<p>Abaixo, temos uma função <code class="language-plaintext highlighter-rouge">main()</code> para demonstrar o sistema de cálculo de preço de venda em funcionamento:</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fun</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nf">println</span><span class="p">(</span><span class="s">"Sistema de cálculo de preço de venda"</span><span class="p">)</span>
+
+    <span class="cm">/** Criação dos veículos para serem utilizados nos cálculos **/</span>
+    <span class="kd">val</span> <span class="py">chevroletCamaro</span> <span class="p">=</span> <span class="nc">Vehicle</span><span class="p">(</span>
+        <span class="n">type</span> <span class="p">=</span> <span class="nc">Type</span><span class="p">.</span><span class="nc">CAR</span><span class="p">,</span>
+        <span class="n">brand</span> <span class="p">=</span> <span class="nc">Brand</span><span class="p">.</span><span class="nc">CHEVROLET</span><span class="p">,</span>
+        <span class="n">value</span> <span class="p">=</span> <span class="mf">150000.00</span>
+    <span class="p">)</span>
+
+    <span class="kd">val</span> <span class="py">chevroletSilverado</span> <span class="p">=</span> <span class="nc">Vehicle</span><span class="p">(</span>
+        <span class="n">type</span> <span class="p">=</span> <span class="nc">Type</span><span class="p">.</span><span class="nc">PICKUP</span><span class="p">,</span>
+        <span class="n">brand</span> <span class="p">=</span> <span class="nc">Brand</span><span class="p">.</span><span class="nc">CHEVROLET</span><span class="p">,</span>
+        <span class="n">value</span> <span class="p">=</span> <span class="mf">190000.00</span>
+    <span class="p">)</span>
+
+    <span class="kd">val</span> <span class="py">fordMaverick</span> <span class="p">=</span> <span class="nc">Vehicle</span><span class="p">(</span>
+        <span class="n">type</span> <span class="p">=</span> <span class="nc">Type</span><span class="p">.</span><span class="nc">CAR</span><span class="p">,</span>
+        <span class="n">brand</span> <span class="p">=</span> <span class="nc">Brand</span><span class="p">.</span><span class="nc">FORD</span><span class="p">,</span>
+        <span class="n">value</span> <span class="p">=</span> <span class="mf">155000.00</span>
+    <span class="p">)</span>
+
+    <span class="kd">val</span> <span class="py">fordRanger</span> <span class="p">=</span> <span class="nc">Vehicle</span><span class="p">(</span>
+        <span class="n">type</span> <span class="p">=</span> <span class="nc">Type</span><span class="p">.</span><span class="nc">PICKUP</span><span class="p">,</span>
+        <span class="n">brand</span> <span class="p">=</span> <span class="nc">Brand</span><span class="p">.</span><span class="nc">FORD</span><span class="p">,</span>
+        <span class="n">value</span> <span class="p">=</span> <span class="mf">185000.00</span>
+    <span class="p">)</span>
+
+    <span class="kd">val</span> <span class="py">fordBus</span> <span class="p">=</span> <span class="nc">Vehicle</span><span class="p">(</span>
+        <span class="n">type</span> <span class="p">=</span> <span class="nc">Type</span><span class="p">.</span><span class="nc">BUS</span><span class="p">,</span>
+        <span class="n">brand</span> <span class="p">=</span> <span class="nc">Brand</span><span class="p">.</span><span class="nc">FORD</span><span class="p">,</span>
+        <span class="n">value</span> <span class="p">=</span> <span class="mf">200000.00</span>
+    <span class="p">)</span>
+
+    <span class="cm">/** Criação da cadeia de regras de cálculos **/</span>
+    <span class="kd">val</span> <span class="py">sellCalculationChain</span> <span class="p">=</span> <span class="nc">SellValueCalculationChain</span><span class="p">.</span><span class="nc">Builder</span>
+        <span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="nc">ChevroletCarSellValueCalculationRule</span><span class="p">())</span>
+        <span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="nc">ChevroletPickupSellValueCalculationRule</span><span class="p">())</span>
+        <span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="nc">FordCarSellValueCalculationRule</span><span class="p">())</span>
+        <span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="nc">FordPickupSellValueCalculationRule</span><span class="p">())</span>
+        <span class="p">.</span><span class="nf">setDefault</span><span class="p">(</span><span class="nc">DefaultDiscountCalculationRule</span><span class="p">())</span>
+        <span class="p">.</span><span class="nf">build</span><span class="p">()</span>
+
+    <span class="cm">/** Calculo de venda do Chevrolet Camaro **/</span>
+    <span class="kd">val</span> <span class="py">chevroletCamaroSellValue</span> <span class="p">=</span> <span class="n">sellCalculationChain</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="n">chevroletCamaro</span><span class="p">)</span>
+    <span class="nf">println</span><span class="p">(</span><span class="s">"Chevrolet Camaro\n\t- Preço de tabela: ${chevroletCamaro.value}\n\t- Preço de venda: ${chevroletCamaroSellValue}\n"</span><span class="p">)</span>
+    <span class="cm">/**
+     * Chevrolet Camaro
+     * 	- Preço de tabela: 150000.0
+     * 	- Preço de venda: 151485.0
+     */</span>
+
+    <span class="cm">/** Calculo de venda do Chevrolet Silverado **/</span>
+    <span class="kd">val</span> <span class="py">chevroletSilveradoSellValue</span> <span class="p">=</span> <span class="n">sellCalculationChain</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="n">chevroletSilverado</span><span class="p">)</span>
+    <span class="nf">println</span><span class="p">(</span><span class="s">"Chevrolet Silverado\n\t- Preço de tabela: ${chevroletSilverado.value}\n\t- Preço de venda: ${chevroletSilveradoSellValue}\n"</span><span class="p">)</span>
+    <span class="cm">/**
+     * Chevrolet Silverado
+     * 	- Preço de tabela: 190000.0
+     * 	- Preço de venda: 189431.0
+     */</span>
+
+    <span class="cm">/** Calculo de venda do Ford Maverick **/</span>
+    <span class="kd">val</span> <span class="py">fordMaverickSellValue</span> <span class="p">=</span> <span class="n">sellCalculationChain</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="n">fordMaverick</span><span class="p">)</span>
+    <span class="nf">println</span><span class="p">(</span><span class="s">"Ford Maverick\n\t- Preço de tabela: ${fordMaverick.value}\n\t- Preço de venda: ${fordMaverickSellValue}\n"</span><span class="p">)</span>
+    <span class="cm">/**
+     * Ford Maverick
+     * 	- Preço de tabela: 155000.0
+     * 	- Preço de venda: 155759.5
+     */</span>
+
+    <span class="cm">/** Calculo de venda do Ford Ranger **/</span>
+    <span class="kd">val</span> <span class="py">fordRangerSellValue</span> <span class="p">=</span> <span class="n">sellCalculationChain</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="n">fordRanger</span><span class="p">)</span>
+    <span class="nf">println</span><span class="p">(</span><span class="s">"Ford Ranger\n\t- Preço de tabela: ${fordRanger.value}\n\t- Preço de venda: ${fordRangerSellValue}\n"</span><span class="p">)</span>
+    <span class="cm">/**
+     * Ford Ranger
+     * 	- Preço de tabela: 185000.0
+     * 	- Preço de venda: 184276.5
+     */</span>
+
+    <span class="cm">/** Calculo de venda do onibus Ford **/</span>
+    <span class="kd">val</span> <span class="py">fordBusSellValue</span> <span class="p">=</span> <span class="n">sellCalculationChain</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="n">fordBus</span><span class="p">)</span>
+    <span class="nf">println</span><span class="p">(</span><span class="s">"Onibus Ford\n\t- Preço de tabela: ${fordBus.value}\n\t- Preço de venda: ${fordBusSellValue}\n"</span><span class="p">)</span>
+    <span class="cm">/**
+     * Onibus Ford
+     * 	- Preço de tabela: 200000.0
+     * 	- Preço de venda: 199800.0
+     */</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Para demonstrar o funcionamento do sistema, primeiro criamos os objetos que representam os veículos, através do <em>data class</em> <code class="language-plaintext highlighter-rouge">Vehicle</code>.</p>
+
+<p>Em seguida, criamos a instância da classe <code class="language-plaintext highlighter-rouge">SellValueCalculationChain</code> através do <em>Builder</em>, adicionando as classes de regras. Perceba que, para cada regra, chamamos a função <code class="language-plaintext highlighter-rouge">add</code>. Temos também a definição da regra <em>default</em> através da função <code class="language-plaintext highlighter-rouge">setDefault</code>.</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">val</span> <span class="py">sellCalculationChain</span> <span class="p">=</span> <span class="nc">SellValueCalculationChain</span><span class="p">.</span><span class="nc">Builder</span>
+        <span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="nc">ChevroletCarSellValueCalculationRule</span><span class="p">())</span>
+        <span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="nc">ChevroletPickupSellValueCalculationRule</span><span class="p">())</span>
+        <span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="nc">FordCarSellValueCalculationRule</span><span class="p">())</span>
+        <span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="nc">FordPickupSellValueCalculationRule</span><span class="p">())</span>
+        <span class="p">.</span><span class="nf">setDefault</span><span class="p">(</span><span class="nc">DefaultDiscountCalculationRule</span><span class="p">())</span>
+        <span class="p">.</span><span class="nf">build</span><span class="p">(</span>
+</code></pre></div></div>
+
+<p>Com a instância da classe <code class="language-plaintext highlighter-rouge">SellValueCalculationChain</code> criada, podemos executar os cálculos de preço de venda para os veículos criados anteriormente. Para isso, basta chamar a função <code class="language-plaintext highlighter-rouge">run</code> passando veículo como parâmetro. O resultado será o preço de venda do veículo. Para informação, podemos comparar o preço de tabela com o preço de venda através dos comentários adicionados abaixo de cada chamada.</p>
+
+<p>O último veículo que teve seu preço de venda calculado é o objeto <code class="language-plaintext highlighter-rouge">fordBus</code>. Esse veículo é do tipo <code class="language-plaintext highlighter-rouge">BUS</code> e do fabricante <code class="language-plaintext highlighter-rouge">FORD</code>. Para essa combinação de tipo + fabricante, nós não criamos nenhuma classe de regra. Assim, o cálculo do preço de venda para esse veículo foi feito através da regra <em>default</em>. Se essa regra não estivesse definida, teríamos como retorno o preço de tabela do veículo.</p>
+
+<p>Perceba que, em nenhum momento, nós vinculamos os veículos às regras de cálculo e nem informamos diretamente qual regra deve ser executada para determinado veículo. Ou seja, quem chama a função <code class="language-plaintext highlighter-rouge">run</code> da classe da cadeia de regras, não tem conhecimento sobre qual regra será executada, nem como essas regras foram implementadas. Assim, a função <code class="language-plaintext highlighter-rouge">main</code> não possui a responsabilidade de saber como efetuar o cálculo do preço de venda dos veículos, ela só precisa saber que precisa chamar a função <code class="language-plaintext highlighter-rouge">run</code> passando o veículo a ser calculado como parâmetro e esperar o resultado do tipo <em>Double</em>.</p>
+
+<h1 id="algumas-considerações-pessoais">Algumas considerações pessoais</h1>
+
+<p>Gostaria de citar aqui alguns pontos que eu considero importantes quanto à implementação desses padrões de projeto.</p>
+
+<h2 id="chain-of-responsibility-1">Chain Of Responsibility</h2>
+
+<ul>
+  <li>A premissa principal desse padrão é a possibilidade de adicionar novos elos à cadeia sem que seja necessário alterar os elos já existentes ou alterar a estrutura da cadeia. Tendo isso em mente, conseguimos respeitar o <a href="/posts/open_close_principle.html">Princípio Aberto/Fechado</a> do <a href="/posts/solid.html">SOLID</a>;</li>
+  <li>Sobre a implementação das classes dos elos da cadeia, é fundamental que o contrato definido para os elos (classe abstrata) seja bem desenhado, pois ele deve conseguir atender à todos os cenários que a cadeia vai ter. Porém, devemos sempre nos preocupar em não tentar torna-la “completa demais” e criar funções e variáveis além do realmente necessário. Não podemos esquecer do <a href="/posts/interface_segregation.html">Princípio da Segregação de Interface</a>, o “I” do do <a href="/posts/solid.html">SOLID</a>;</li>
+  <li>Quanto aos elos da cadeia, é fundamental que toda a lógica referente àquele elo esteja dentro da classe de implementação do elo ou em classes auxiliares. Um elo da cadeia não pode depender de outro em termos de lógica;</li>
+  <li>Ao implementar esse padrão de projeto, a estrutura não pode permitir que os dados que trafegam entre os elos da cadeia sejam alterados. Ou seja, os dados não podem ser alterados em um elo e repassados para outro elo. A partir do momento que um elo da cadeia é executado, a execução da cadeia deve ser interrompida;</li>
+  <li>A responsabilidade da função <code class="language-plaintext highlighter-rouge">shouldCalculate</code> dos elos é única e exclusivamente decidir se o elo deve ser executado ou não. Dentro dessa função, devemos ter o mínimo de lógica possível para tomar essa decisão;</li>
+  <li>Não podemos esquecer dos testes unitários. Como temos classes pequenas e de escopo muito bem definido para os elos da cadeia, é possível testá-las tranquilamente;</li>
+  <li>No projeto apresentado aqui, utilizei a classe <code class="language-plaintext highlighter-rouge">SellValueCalculationChain</code> como responsável pelo controle da chamada dos elos. Na definição desse padrão, essa classe não existe. Ao invés disso, cada elo é responsável por conhecer o próximo elo e chamá-lo quando necessário. Eu, pessoalmente, prefiro ter uma classe que faça esse controle. Assim, os elos deixam de ter a responsabilidade de conhecer e chamar o próximo elo, ficando apenas com a responsabilidade de “decidir” quando eles devem ser executados e com a lógica em si. Essa classe em conjunto com o uso do padrão <em>Builder</em> torna a criação da cadeia mais simples e a adição ou remoção de elos fica facilitada, inclusive em tempo de execução quando precisamos “ligar” ou ‘desligar” algum elo com base em <em>feature flags</em> (ou <em>feature toggles</em>).</li>
+</ul>
+
+<h2 id="builder-1">Builder</h2>
+
+<ul>
+  <li>Esse padrão é muito útil quando precisamos criar objetos complexos e que dependem de várias informações externas, que não poderiam ser feitas apenas passando dados via construtor;</li>
+  <li>É importante que a classe a ser construída através do <em>Builder</em> tenha seu construtor marcado como privado. Isso evita que a classe seja construída sem o uso do seu <em>Builder</em>, ajudando a eliminar possíveis inconsistências de dados ou comportamentos inadequados ao criar a instância da classe de forma errada/não recomendada.</li>
+  <li>No exemplo apresentado aqui, eu defini a classe <em>Builder</em> como <a href="https://kotlinlang.org/docs/object-declarations.html#object-declarations-overview"><code class="language-plaintext highlighter-rouge">object</code></a>, uma forma de criar <em>Singleton</em> em Kotlin. Como esse exemplo é simples, não precisamos de nenhuma classe auxiliar para que a instância da classe <code class="language-plaintext highlighter-rouge">SellValueCalculationChain</code> seja criada, então o <em>Builder</em> ser um <em>Singleton</em> faz total sentido. Se alguma classe fosse necessária, poderíamos definir o <em>Builder</em> como uma classe comum e passar a classe auxiliar como parâmetro de construtor do <em>Builder</em>.
+    <ul>
+      <li>Acredito que seja importante que as funções públicas do <em>Builder</em> sejam apenas voltadas para a criação da instância da classe da qual aquele <em>Builder</em> pertence. Se eventualmente o <em>Builder</em> precisar de alguma classe extra para que ele possa criar a instância, essa classe deve ser passada no construtor do <em>Builder,</em> nunca via função. Assim, evitamos confusões quanto ao uso do <em>Builder</em>. Em resumo, usamos o construtor do <em>Builder</em> para fornecer dados necessários para o <em>Builder</em> fazer o seu trabalho e as funções públicas são para fornecer dados ao <em>Builder</em> que serão adicionadas à instância da classe a ser criada.</li>
+    </ul>
+  </li>
+</ul>
+
+<h1 id="projeto-completo">Projeto completo</h1>
+
+<p>Para ver esse projeto no <a href="https://github.com/hallisonoliveira/ChainOfResponsibilityAndBuilderWithKotlin">Github</a> ou no <a href="https://pl.kotl.in/-Tp4Dfgp4">Kotlin Playground</a></p>
+
+<h1 id="referências">Referências</h1>
+
+<ul>
+  <li><a href="https://refactoring.guru/design-patterns/chain-of-responsibility">Refactoring Guru - Chain of Responsibility</a></li>
+  <li><a href="https://refactoring.guru/design-patterns/builder">Refactoring Guru - Builder</a></li>
+</ul>]]></content><author><name></name></author><category term="Design Patterns" /><category term="kotlin" /><category term="design pattern" /><category term="padrões de projeto" /><category term="chain of responsibility" /><category term="cadeia de responsabilidade" /><category term="builder" /><summary type="html"><![CDATA[Os Design Patterns]]></summary></entry><entry><title type="html">Empatia Assertiva - Como ser um líder incisivo sem perder a humanidade</title><link href="https://hallisonoliveira.com.br/empatia_assertiva/" rel="alternate" type="text/html" title="Empatia Assertiva - Como ser um líder incisivo sem perder a humanidade" /><published>2022-12-23T00:00:00-03:00</published><updated>2022-12-23T00:00:00-03:00</updated><id>https://hallisonoliveira.com.br/empatia_assertiva</id><content type="html" xml:base="https://hallisonoliveira.com.br/empatia_assertiva/"><![CDATA[<p>Liderar pessoas não é uma tarefa fácil, fato que é bastante comentado e é origem de vários conteúdos pelo mundo a fora. Vários desses conteúdos abordam o desafio central da liderança: pessoas. As diferentes personalidades, opiniões, momentos de vida, experiências, etc, influenciam na forma como o líder gera o time, pois é preciso sempre um cuidado para que sua liderança não se torne uma tirania (ou uma liderança totalmente omissa), e que também consiga trazer resultados satisfatórios para a empresa e que sejam motivo de orgulho para o time. É justamente na forma como o líder deve tratar as pessoas que o livro <strong>Empatia assertiva: como ser um líder incisivo sem perder a humanidade</strong> se baseia. Nele, a autora <a href="https://kimmalonescott.com/bio">Kim Scott</a> traz diversas sugestões práticas baseadas em sua própria experiência, de como os líderes podem levar seus times ao sucesso sem que o lado humano da liderança seja deixado de lado.</p>
+
+<p>O livro é baseado no conceito de empatia assertiva da própria autora onde um bom líder deve importar-se pessoalmente com os seus liderados e ao mesmo tempo, deve confronta-los diretamente. Ao longo do livro, a autora explica os comportamentos que fundamentam esse conceito, além de formas que podem ser utilizadas para identificar esses comportamentos e como evita-los. Além disso, ela traz algumas ferramentas, técnicas e dicas que podem ser utilizadas para colocar a empatia assertiva em prática, pautados sempre por experiências reais vivenciados pela própria autora ou por outras referências na area.</p>
+
+<p>Para esse resumo, vou me ater apenas ao conceito de empatia assertiva pois o livro traz diversos <em>insigts</em> e outros conceitos bem interessantes que valeriam um resumo a parte. Quanto ao conceito central, a autora descreve quatro comportamentos comumente vistos nos líderes, mas não restrito somente à eles. Os comportamentos são os seguintes:</p>
+
+<p><br />
+<img src="/images/books/empatia_assertiva/quadrantes.png" alt="Quadrantes de comportamento e dimensões da empatia assertiva" width="400" /></p>
+
+<p><em>Quadrantes de comportamento e dimensões da empatia assertiva - Empatia Assertiva, p. 53. Scott, Kim.</em>
+<br /></p>
+
+<p>Cada quadrante da imagem acima está relacionado à alguns comportamentos (ou atitudes), dos líderes ao liderar. Descrevo abaixo, de maneira super resumida (afinal eu quero que você leia o livro =D), cada um deles:</p>
+
+<h1 id="agressividade-ofensiva">Agressividade ofensiva</h1>
+
+<p>A agressividade ofensiva é sentida por quem recebe um feedback de alguém que faz uma crítica de maneira depreciativa, sem se importar em como a pessoal que recebeu essa crítica vai se sentir ao recebe-la. Cito dois exemplos presentes no livro: quando um chefe inseguro entra em modo de depreciação e passa a criticar os seus liderados em público ou quando criticamos a atitude de alguém sem se dar ao trabalho de entender os motivos daquela atitude.</p>
+
+<p>Um ponto importante, que a autora faz questão de lembrar, é o de que “a agressividade ofensiva é um comportamento, não um traço de personalidade”. Ou seja, todos nós podemos cometer a agressividade ofensiva em algum momento, mas é importante entendermos em nós mesmos qual é o gatilho para esse comportamento e assim, conseguiremos evitar que isso aconteça.</p>
+
+<h1 id="insinceridade-manipuladora">Insinceridade manipuladora</h1>
+
+<p>A insinceridade manipuladora pode ser interpretada com falsidade, quando o comportamento das pessoas é pautado pela vontade de que todo mundo goste delas ou quando elas acham que terão alguma vantagem política quando elogiam ou criticam algo, sem que esse elogio ou crítica seja verdadeiro. Um bom exemplo é quando elogiamos o trabalho de alguém apenas para deixa-la feliz, mesmo que tenhamos consciência de que o trabalho realizado por ela não está bom. Outro exemplo é quando expressamos uma opinião sobre a atitude de alguém sem entender os motivos daquela atitude (agressividade ofensiva), e logo em seguida, pedimos desculpas pela crítica, concordando com a atitude da pessoa (ainda sem entender os motivos), mostrando que não estamos preocupados com a atitude em si nem com os motivos, mas sim com as consequências dessa crítica para nós mesmos.</p>
+
+<h1 id="empatia-nociva">Empatia nociva</h1>
+
+<p>A empatia nociva acontece quando nos importamos com as pessoas e com isso evitamos critica-las por estarmos “focados demais em manter a paz e a harmonia na equipe”. Além, disso, deixamos de incentivar os membros do time a criticar uns aos outros, temendo semear a discórdia e acabar criando um clima de conflito. Por crítica aqui, entenda como críticas construtivas, feedback’s com o intuito de fazer evoluir quem o recebe. Como comentado anteriormente, os pilares da empatia assertiva são importar-se pessoalmente e confronta-las diretamente. Empatia nociva é quando nos importamos pessoalmente mas não confrontamos diretamente.</p>
+
+<h1 id="empatia-assertiva">Empatia assertiva</h1>
+
+<p>O ponto central do livro, é quando nos importamos pessoalmente com as pessoas, entendemos seus anseios, inseguranças, personalidades, etc. Além disso, conseguimos confronta-las diretamente, dando feedback’s verdadeiros e sucintos, a fim de orienta-los à atingirem seu melhor potencial. Para nos importarmos pessoalmente, é fundamental que nossa relação com os membros do time vá além do estritamente profissional e passe para uma relação mais pessoal. Problemas em casa, na família, insegurança quanto à carreira profissional e diferentes momentos de vida influenciam diretamente na postura das pessoas no trabalho. Por isso é importante que essa relação seja pessoal e mútua, você deve abrir-se pessoalmente para elas para que elas se sintam confortáveis em abrir-se pessoalmente para você. Só assim, é possível conhecer as pessoas verdadeiramente e ser assertivamente empático com elas.</p>
+
+<p>Quando nos importamos pessoalmente, nossos feedback’s se tornam mais verdadeiros, pois conseguimos entender com mais clareza as atitudes das pessoas. Esse é o ponto central para confrontar as pessoas diretamente, sem rodeios, sem nos colocarmos acima das pessoas. Apenas dando um feedback claro e sem maldade. A história que a autora conta sobre a Belvedere, sua golden retriever, é bem interessante e demonstra muito bem isso (leiam o livro =D).</p>
+
+<h1 id="conclusão">Conclusão</h1>
+
+<p>Esse livro é muito interessante. Traz diversos casos reais vivenciados pela autora, tanto em suas experiências trabalhando em grandes empresas como Apple, Twitter e Google, mas também experiências vivenciadas por ela em seu trabalho orientando líderes.</p>
+
+<p>Comecei esse resumo falando que liderar pessoas não é uma tarefa fácil e de fato, não é! Lideres em geral passam por diversas dificuldades, por vezes se sentem sozinhos e sentem receio de não estar fazendo um bom trabalho. Isso é natural. O objetivo da autora com esse livro é justamente ajudar os leitores a evitar os erros que ela cometeu, tranquilizando-os e mostrando que os lideres não estão sozinhos. Mudar sua abordagem pode não ser tão complicado e que todos os lideres são seres humanos, e isso é uma vantagem. Com isso, eu acredito que a autora conseguiu atingir seu objetivo, pois o livro é enriquecedor, claro e de uma leitura leve. Então, se você não leu ainda, recomendo que leia.</p>
+
+<h1 id="alguns-links">Alguns links</h1>
+
+<ul>
+  <li><a href="https://kimmalonescott.com/">Site pessoal da Kim Scott</a></li>
+  <li><a href="[https://www.amazon.com.br/Empatia-Assertiva-Incisivo-Perder-Humanidade/dp/8550810789">Amazon</a></li>
+</ul>]]></content><author><name></name></author><category term="Livros" /><category term="book" /><category term="empatia assertiva" /><category term="kim scott" /><summary type="html"><![CDATA[Liderar pessoas não é uma tarefa fácil, fato que é bastante comentado e é origem de vários conteúdos pelo mundo a fora. Vários desses conteúdos abordam o desafio central da liderança: pessoas. As diferentes personalidades, opiniões, momentos de vida, experiências, etc, influenciam na forma como o líder gera o time, pois é preciso sempre um cuidado para que sua liderança não se torne uma tirania (ou uma liderança totalmente omissa), e que também consiga trazer resultados satisfatórios para a empresa e que sejam motivo de orgulho para o time. É justamente na forma como o líder deve tratar as pessoas que o livro Empatia assertiva: como ser um líder incisivo sem perder a humanidade se baseia. Nele, a autora Kim Scott traz diversas sugestões práticas baseadas em sua própria experiência, de como os líderes podem levar seus times ao sucesso sem que o lado humano da liderança seja deixado de lado.]]></summary></entry><entry><title type="html">D - Princípio da Inversão de Dependência</title><link href="https://hallisonoliveira.com.br/dependency_inversion/" rel="alternate" type="text/html" title="D - Princípio da Inversão de Dependência" /><published>2022-09-05T00:00:00-03:00</published><updated>2022-09-05T00:00:00-03:00</updated><id>https://hallisonoliveira.com.br/dependency_inversion</id><content type="html" xml:base="https://hallisonoliveira.com.br/dependency_inversion/"><![CDATA[<p>Em inglês, <em>Dependency Inversion Principle</em>.</p>
+
+<p>A ideia central desse princípio é a de que módulos não devem depender de implementações concretas, mas sim de abstrações. Esse é um dos conceitos centrais da arquitetura limpa, o qual  protege a camada de domínio da aplicação de possuir dependências à bibliotecas e/ou frameworks externos dos quais ela não deveria possuir.</p>
+
+<p>Para entender melhor o princípio, vamos utilizar o exemplo de <em>Logger</em> novamente (já o utilizamos para demonstrar o <a href="/posts/open_close_principle.html">princípio aberto/fechado</a>).</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fun</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">val</span> <span class="py">logger</span> <span class="p">=</span> <span class="nc">TerminalLogger</span><span class="p">()</span>
+
+    <span class="n">logger</span><span class="p">.</span><span class="nf">debug</span><span class="p">(</span><span class="s">"Log de debug"</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">class</span> <span class="nc">TerminalLogger</span> <span class="p">{</span>
+    <span class="k">fun</span> <span class="nf">debug</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nc">String</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nf">println</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Com esse exemplo simples, já é possível visualizar a violação do princípio. Perceba que a variável <code class="language-plaintext highlighter-rouge">logger</code> é do tipo <code class="language-plaintext highlighter-rouge">TerminalLogger()</code>, que é uma implementação concreta. Ou seja, nossa função <code class="language-plaintext highlighter-rouge">main()</code>, que nesse exemplo representa qualquer outra classe, está suscetível à mudanças que eventualmente possam acontecer na classe <code class="language-plaintext highlighter-rouge">TerminalLogger()</code>. Podemos demonstrar isso fazendo com que a classe <code class="language-plaintext highlighter-rouge">TerminalLogger()</code> passe a depender de uma outra classe. Nesse caso, a função <code class="language-plaintext highlighter-rouge">main()</code> teria que conhecer essa nova classe para que uma nova instância de <code class="language-plaintext highlighter-rouge">TerminalLogger</code> possa ser criada:</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fun</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">val</span> <span class="py">systemProperties</span> <span class="p">=</span> <span class="nc">SystemProperties</span><span class="p">()</span>
+    <span class="kd">val</span> <span class="py">logger</span> <span class="p">=</span> <span class="nc">TerminalLogger</span><span class="p">(</span><span class="n">systemProperties</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="p">.</span><span class="nf">debug</span><span class="p">(</span><span class="s">"Log de debug"</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">class</span> <span class="nc">TerminalLogger</span><span class="p">(</span>
+    <span class="k">private</span> <span class="kd">val</span> <span class="py">systemProperties</span><span class="p">:</span> <span class="nc">SystemProperties</span>
+<span class="p">)</span> <span class="p">{</span>
+    <span class="k">fun</span> <span class="nf">debug</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nc">String</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">val</span> <span class="py">systemName</span> <span class="p">=</span> <span class="n">systemProperties</span><span class="p">.</span><span class="nf">getName</span><span class="p">()</span>
+        <span class="nf">println</span><span class="p">(</span><span class="s">"$systemName - $message"</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">class</span> <span class="nc">SystemProperties</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">fun</span> <span class="nf">getName</span><span class="p">():</span> <span class="nc">String</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="s">"Exemplo-DIP"</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Agora, temos a classe <code class="language-plaintext highlighter-rouge">SystemProperties</code> que é responsável por fornecer o nome do sistema através da função <code class="language-plaintext highlighter-rouge">getName(): String</code>. O problema aqui é que, quem depende diretamente dela  é a classe <code class="language-plaintext highlighter-rouge">TerminalLogger</code>. Porém, é a função <code class="language-plaintext highlighter-rouge">main()</code> quem deve instancia-la, fazendo com que a função conheça uma dependência de <code class="language-plaintext highlighter-rouge">TerminalLogger</code>, algo que está além da sua responsabilidade.</p>
+
+<p>Vejamos como esse exemplo ficaria, eliminando a violação desse princípio. O primeiro passo, é criar uma abstração (interface), para os <em>Loggers</em> e fazer com que a classe <code class="language-plaintext highlighter-rouge">TerminalLogger</code> a implemente:</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">interface</span> <span class="nc">Logger</span> <span class="p">{</span>
+
+    <span class="k">fun</span> <span class="nf">debug</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nc">String</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">class</span> <span class="nc">TerminalLogger</span><span class="p">(</span>
+    <span class="k">private</span> <span class="kd">val</span> <span class="py">systemProperties</span><span class="p">:</span> <span class="nc">SystemProperties</span>
+<span class="p">)</span> <span class="p">:</span> <span class="nc">Logger</span> <span class="p">{</span>
+    <span class="k">override</span> <span class="k">fun</span> <span class="nf">debug</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nc">String</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">val</span> <span class="py">systemName</span> <span class="p">=</span> <span class="n">systemProperties</span><span class="p">.</span><span class="nf">getName</span><span class="p">()</span>
+        <span class="nf">println</span><span class="p">(</span><span class="s">"$systemName - $message"</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Feito isso, precisamos de uma forma de criar uma nova instância da classe <code class="language-plaintext highlighter-rouge">TerminalLogger</code> sem que a função <code class="language-plaintext highlighter-rouge">main()</code> conheça suas dependências. Uma forma de fazer isso, é através de <a href="[https://pt.wikipedia.org/wiki/Injeção_de_dependência](https://pt.wikipedia.org/wiki/Inje%C3%A7%C3%A3o_de_depend%C3%AAncia)">injeção de dependência (que falaremos num outro post em breve)</a>, ou através de um <a href="[https://refactoring.guru/pt-br/design-patterns/abstract-factory](https://refactoring.guru/pt-br/design-patterns/abstract-factory)*"><em>design pattern</em></a>* chamado <a href="[https://refactoring.guru/pt-br/design-patterns/abstract-factory](https://refactoring.guru/pt-br/design-patterns/abstract-factory)"><em>Abstract Factory (fábrica abstrata)</em></a>.</p>
+
+<p>Esse <em>design pattern</em> especifica um formato que pode ser utilizado para criar e entregar as instâncias dos objetos que precisamos. Essa classe é responsável por conhecer as dependências necessárias para a criação das instâncias, evitando que essa responsabilidade fique nas classes onde não deveriam estar.</p>
+
+<p>Vejamos nosso exemplo, aplicando a interface <code class="language-plaintext highlighter-rouge">Logger</code>, juntamente com o <em>design pattern Abstract Factory</em>:</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fun</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+
+    <span class="kd">val</span> <span class="py">loggerFactory</span> <span class="p">=</span> <span class="nc">LoggerFactory</span><span class="p">()</span>
+    <span class="kd">val</span> <span class="py">logger</span> <span class="p">=</span> <span class="n">loggerFactory</span><span class="p">.</span><span class="nf">createTerminalLogger</span><span class="p">()</span>
+
+    <span class="n">logger</span><span class="p">.</span><span class="nf">debug</span><span class="p">(</span><span class="s">"Log de debug"</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">interface</span> <span class="nc">Logger</span> <span class="p">{</span>
+
+    <span class="k">fun</span> <span class="nf">debug</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nc">String</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">class</span> <span class="nc">TerminalLogger</span><span class="p">(</span>
+    <span class="k">private</span> <span class="kd">val</span> <span class="py">systemProperties</span><span class="p">:</span> <span class="nc">SystemProperties</span>
+<span class="p">)</span> <span class="p">:</span> <span class="nc">Logger</span> <span class="p">{</span>
+
+    <span class="k">override</span> <span class="k">fun</span> <span class="nf">debug</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nc">String</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">val</span> <span class="py">systemName</span> <span class="p">=</span> <span class="n">systemProperties</span><span class="p">.</span><span class="nf">getName</span><span class="p">()</span>
+        <span class="nf">println</span><span class="p">(</span><span class="s">"$systemName - $message"</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">class</span> <span class="nc">SystemProperties</span><span class="p">()</span> <span class="p">{</span>
+
+    <span class="k">fun</span> <span class="nf">getName</span><span class="p">():</span> <span class="nc">String</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="s">"Exemplo-DIP"</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">class</span> <span class="nc">LoggerFactory</span><span class="p">()</span> <span class="p">{</span>
+
+    <span class="k">private</span> <span class="kd">val</span> <span class="py">systemProperties</span> <span class="p">=</span> <span class="nc">SystemProperties</span><span class="p">()</span>
+
+    <span class="k">fun</span> <span class="nf">createTerminalLogger</span><span class="p">():</span> <span class="nc">TerminalLogger</span> <span class="p">{</span>
+        <span class="kd">val</span> <span class="py">terminalLogger</span> <span class="p">=</span> <span class="nc">TerminalLogger</span><span class="p">(</span><span class="n">systemProperties</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">terminalLogger</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Agora, temos a classe <code class="language-plaintext highlighter-rouge">LoggerFactory</code> que é responsável por criar e retornar uma instância de <code class="language-plaintext highlighter-rouge">TerminalLogger</code> através da função <code class="language-plaintext highlighter-rouge">createTerminalLogger()</code>. Assim, a dependência pela classe <code class="language-plaintext highlighter-rouge">SystemProperties</code> fica na nossa classe <em>factory</em> e não mais na função <code class="language-plaintext highlighter-rouge">main()</code>.</p>
+
+<p>Essa solução pode deixar uma certa dúvida, já que a classe <code class="language-plaintext highlighter-rouge">LoggerFactory</code> depende de <code class="language-plaintext highlighter-rouge">SystemProperties</code>. Isso seria facilmente resolvido utilizando injeção de dependências, conforme citado anteriormente, mas como trata-se de um exemplo simples, essa solução é aceitável, pois apesar de a dependência ainda existir, ela está numa classe que faz mais sentido de estar. A classe <code class="language-plaintext highlighter-rouge">LoggerFactory</code> é responsável por criar a instância de <code class="language-plaintext highlighter-rouge">TerminalLogger</code> e, portanto, deve conhecer suas dependências, ao contrário da função <code class="language-plaintext highlighter-rouge">main()</code> que só precisa utilizar a classe <code class="language-plaintext highlighter-rouge">TerminalLogger</code>, não importando como ela funciona ou quais suas dependências.</p>
+
+<h2 id="conclusão">Conclusão</h2>
+
+<p>O Princípio da Inversão de Dependência é um princípio muito utilizado quando falamos de arquitetura limpa, que possui como premissa o uso de abstrações para redução do acoplamento entre as camadas. Podemos ver também que, mesmo que todas as abstrações sejam bem estruturadas, ainda terão casos onde os acoplamentos não serão removidos por completo, como a classe String do Java, citada por Robert C. Martin como exemplo aceitável de dependência direta à implementação.</p>
+
+<h2 id="referências">Referências</h2>
+
+<ul>
+  <li>Arquitetura Limpa: O Guia do Artesão para Estrutura e Design de Software. Martin, Robert C. ; traduzido por Samantha Batista. Rio de Janeiro. Alta Books, 2018.</li>
+</ul>]]></content><author><name></name></author><category term="SOLID" /><category term="solid" /><category term="uncle bob" /><category term="software" /><category term="development" /><category term="dependency inversion" /><category term="inversão de dependencia" /><summary type="html"><![CDATA[Em inglês, Dependency Inversion Principle.]]></summary></entry><entry><title type="html">I - Princípio da Segregação de Interface</title><link href="https://hallisonoliveira.com.br/posts/interface_segregation.html" rel="alternate" type="text/html" title="I - Princípio da Segregação de Interface" /><published>2022-08-30T00:00:00-03:00</published><updated>2022-08-30T00:00:00-03:00</updated><id>https://hallisonoliveira.com.br/posts/interface-segregation</id><content type="html" xml:base="https://hallisonoliveira.com.br/posts/interface_segregation.html"><![CDATA[<p>Em inglês, <em>Interface Segregation Principle</em>.</p>
+
+<h1 id="interfaces">Interfaces</h1>
+
+<p>Antes de falarmos sobre esse princípio, é importante entendermos o que é interface:</p>
+
+<blockquote>
+  <p>Uma interface é uma série de abstrações ou um contrato ao qual uma determinada classe, que implementa essa interface, deve seguir. Nas interfaces, são definidos os comportamentos, ou seja, as funções e atributos que compõem o contrato, mas nada é implementado de fato.</p>
+</blockquote>
+
+<p>Assim sendo, considere seguinte interface:</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">interface</span> <span class="nc">Cachorro</span> <span class="p">{</span>
+    <span class="kd">val</span> <span class="py">cor</span><span class="p">:</span> <span class="nc">String</span>
+
+    <span class="k">fun</span> <span class="nf">latir</span><span class="p">()</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Perceba que nessa interface definimos duas coisas: um atributo <code class="language-plaintext highlighter-rouge">cor</code> e uma ação <code class="language-plaintext highlighter-rouge">latir()</code>. Porém, não foi definida uma cor e a função <code class="language-plaintext highlighter-rouge">latir</code> não possui implementação. Isso significa que esse é apenas o contrato obrigatório para todas as classes que implementam essa interface.</p>
+
+<p>Assim, quanto implementamos uma classe, esse contrato deve ser seguido e as implementações deverão ser feitas:</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">Beagle</span> <span class="p">:</span> <span class="nc">Cachorro</span> <span class="p">{</span>
+    <span class="k">override</span> <span class="kd">val</span> <span class="py">cor</span><span class="p">:</span> <span class="nc">String</span> <span class="p">=</span> <span class="s">"Branco"</span>
+
+    <span class="k">override</span> <span class="k">fun</span> <span class="nf">latir</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nf">println</span><span class="p">(</span><span class="s">"Latindo..."</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h1 id="o-princípio">O princípio</h1>
+
+<p>Entendido o uso de interfaces, vamos analisar o Princípio de Segregação de Interface. Basicamente, esse princípio fala que as classes clientes, ou seja, as classes que implementam interfaces, não deveriam implementar comportamentos que elas não precisam. Isso quer dizer que precisamos definir nossas interfaces de forma que o conjunto de funções e atributos nela definidos, seja coeso, faça sentido.</p>
+
+<p>Vejamos a seguinte interface. Nela, estamos definindo um contrato a ser seguido por classes que representarão meios de transporte.</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">interface</span> <span class="nc">Transporte</span> <span class="p">{</span>
+
+    <span class="kd">val</span> <span class="py">quantidadeDeRodas</span><span class="p">:</span> <span class="nc">Int</span>
+
+    <span class="k">fun</span> <span class="nf">ligarMotor</span><span class="p">()</span>
+
+    <span class="k">fun</span> <span class="nf">andar</span><span class="p">()</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Vamos criar uma classe que implementa essa interface.</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">Carro</span> <span class="p">:</span> <span class="nc">Transporte</span> <span class="p">{</span>
+
+    <span class="k">override</span> <span class="kd">val</span> <span class="py">quantidadeDeRodas</span><span class="p">:</span> <span class="nc">Int</span> <span class="p">=</span> <span class="mi">4</span>
+
+    <span class="k">override</span> <span class="k">fun</span> <span class="nf">ligarMotor</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nf">println</span><span class="p">(</span><span class="s">"Motor ligado."</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="k">override</span> <span class="k">fun</span> <span class="nf">andar</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nf">println</span><span class="p">(</span><span class="s">"Andando..."</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Até aqui, tudo bem! Estamos definindo uma classe <code class="language-plaintext highlighter-rouge">Carro</code> que consegue seguir por completo o contrato definido pela interface <code class="language-plaintext highlighter-rouge">Transporte</code>.</p>
+
+<p>Agora, imagine que precisamos aumentar as opções de meio de transporte do nosso sistema, adicionando a opção Bicicleta:</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">Bicicleta</span> <span class="p">:</span> <span class="nc">Transporte</span> <span class="p">{</span>
+
+    <span class="k">override</span> <span class="kd">val</span> <span class="py">quantidadeDeRodas</span><span class="p">:</span> <span class="nc">Int</span> <span class="p">=</span> <span class="mi">2</span>
+
+    <span class="k">override</span> <span class="k">fun</span> <span class="nf">ligarMotor</span><span class="p">()</span> <span class="p">{</span>
+        <span class="c1">// Não implementada. Bicicleta não tem motor.</span>
+    <span class="p">}</span>
+
+    <span class="k">override</span> <span class="k">fun</span> <span class="nf">andar</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nf">println</span><span class="p">(</span><span class="s">"Andando..."</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>No caso da classe <code class="language-plaintext highlighter-rouge">Bicicleta</code>, nem todo o contrato pôde ser seguido, pois bicicletas não possuem motor (considerando a bicicleta normal e não a elétrica), e portando, a função <code class="language-plaintext highlighter-rouge">ligarMotor()</code> não faz sentido para ela.</p>
+
+<p>Sendo assim, temos o Princípio de Segregação de Interface sendo violado na classe <code class="language-plaintext highlighter-rouge">Bicicleta</code>, pois a interface <code class="language-plaintext highlighter-rouge">Transporte</code> está definindo um comportamento que a classe não precisa e/ou não pode ter.</p>
+
+<p>Uma alternativa para esse caso, seria redefinir essa interface, melhorando nível de abstração de forma que o princípio não seja quebrado:</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">interface</span> <span class="nc">TransporteSemMotor</span> <span class="p">{</span>
+
+    <span class="kd">val</span> <span class="py">quantidadeDeRodas</span><span class="p">:</span> <span class="nc">Int</span>
+
+    <span class="k">fun</span> <span class="nf">andar</span><span class="p">()</span>
+<span class="p">}</span>
+
+<span class="kd">interface</span> <span class="nc">TransporteComMotor</span> <span class="p">{</span>
+
+    <span class="kd">val</span> <span class="py">quantidadeDeRodas</span><span class="p">:</span> <span class="nc">Int</span>
+
+    <span class="k">fun</span> <span class="nf">ligarMotor</span><span class="p">()</span>
+
+    <span class="k">fun</span> <span class="nf">andar</span><span class="p">()</span>
+<span class="p">}</span>
+
+<span class="kd">class</span> <span class="nc">Carro</span> <span class="p">:</span> <span class="nc">TransporteComMotor</span> <span class="p">{</span>
+
+    <span class="k">override</span> <span class="kd">val</span> <span class="py">quantidadeDeRodas</span><span class="p">:</span> <span class="nc">Int</span> <span class="p">=</span> <span class="mi">4</span>
+
+    <span class="k">override</span> <span class="k">fun</span> <span class="nf">ligarMotor</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nf">println</span><span class="p">(</span><span class="s">"Motor ligado."</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="k">override</span> <span class="k">fun</span> <span class="nf">andar</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nf">println</span><span class="p">(</span><span class="s">"Andando..."</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">class</span> <span class="nc">Bicicleta</span> <span class="p">:</span> <span class="nc">TransporteSemMotor</span> <span class="p">{</span>
+
+    <span class="k">override</span> <span class="kd">val</span> <span class="py">quantidadeDeRodas</span><span class="p">:</span> <span class="nc">Int</span> <span class="p">=</span> <span class="mi">4</span>
+
+    <span class="k">override</span> <span class="k">fun</span> <span class="nf">andar</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nf">println</span><span class="p">(</span><span class="s">"Andando..."</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Agora, temos duas interfaces, uma para representar meios de transportes motorizados e outra para representar meios de transportes sem motor.</p>
+
+<p>É possível perceber também que ambas as interfaces possuem o atributo <code class="language-plaintext highlighter-rouge">quantidadeDeRodas</code> e a função <code class="language-plaintext highlighter-rouge">andar()</code>. Isso para o nosso exemplo é aceitável, já que é um exemplo simples. Mas, para um projeto real, que precisa ser escalável e ter suas interfaces muito bem definidas, talvez essa solução não seja interessante e a revisão dessas abstrações deva se feita com mais cuidado.</p>
+
+<h1 id="conclusão">Conclusão</h1>
+
+<p>O Princípio de Segregação de Interface é um princípio simples e fácil de ser violado ao adicionar nas interfaces comportamentos e atributos além do necessário. Por outro lado, a tentativa de corrigir essa violação pode fazer com que as abstrações sejam muito específicas, gerando um número de interfaces maior do que o necessário. Isso traz a reflexão de que, quando vamos definir abstrações para os nossos projetos, precisamos analisar com cuidado para que não criemos interfaces muito genéricas e nem muito específicas.</p>]]></content><author><name></name></author><category term="SOLID" /><category term="solid" /><category term="uncle bob" /><category term="software" /><category term="development" /><category term="interface segregation" /><category term="segregação de interface" /><summary type="html"><![CDATA[Em inglês, Interface Segregation Principle.]]></summary></entry><entry><title type="html">L - Princípio de Substituição de Liskov</title><link href="https://hallisonoliveira.com.br/liskov_substitution/" rel="alternate" type="text/html" title="L - Princípio de Substituição de Liskov" /><published>2022-08-18T00:00:00-03:00</published><updated>2022-08-18T00:00:00-03:00</updated><id>https://hallisonoliveira.com.br/liskov_substitution</id><content type="html" xml:base="https://hallisonoliveira.com.br/liskov_substitution/"><![CDATA[<p>Em inglês, <em>Liskov Substitution Principle</em>.</p>
+
+<h2 id="um-pouco-de-história">Um pouco de história</h2>
+
+<p>Esse princípio vem do notável trabalho de <a href="https://en.wikipedia.org/wiki/Barbara_Liskov">Bárbara Liskov</a>, cientista da computação, que foi pioneira em diversas contribuições para a ciência da computação e computação distribuída.</p>
+
+<p>Barbara foi reconhecida em 2008 com o <em><a href="https://en.wikipedia.org/wiki/Turing_Award">Turing Award</a></em>, a mais alta distinção em ciência da computação, dada à ela “por contribuições para fundamentos práticos e teóricos de linguagem de programação e design de sistemas, especialmente relacionados à abstração de dados, tolerância a falhas e computação distribuída”. <a href="https://amturing.acm.org/award_winners/liskov_1108679.cfm"><em>traduzido de</em> A. M. Turing Award</a>.</p>
+
+<p>No vídeo abaixo, Bárbara fala para o A. M. Turing Award sobre a origem e o nome desse princípio:</p>
+
+<div class="youtube-wrapper">
+  <iframe src="https://www.youtube.com/embed/-Z-17h3jG0A" allowfullscreen=""></iframe>
+</div>
+
+<h2 id="o-princípio">O princípio</h2>
+
+<p>Basicamente, o Princípio de Substituição de Liskov fala sobre tipagem comportamental. Ou seja, quando temos uma classe principal e uma sub-classe que extende da principal (herança), a sub-classe deve se comportar da mesma forma que a classe principal, podendo substituí-la sem que a execução do sistema seja comprometida.</p>
+
+<h3 id="comportamento">Comportamento</h3>
+
+<p>Vejamos o seguinte exemplo, onde esse princípio é quebrado:</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">open</span> <span class="kd">class</span> <span class="nc">ValidadorDeTexto</span> <span class="p">{</span>
+    <span class="k">open</span> <span class="kd">val</span> <span class="py">limiteDeCaracteres</span> <span class="p">=</span> <span class="mi">5</span>
+
+    <span class="k">fun</span> <span class="nf">ehValido</span><span class="p">(</span><span class="n">texto</span><span class="p">:</span> <span class="nc">String</span><span class="p">):</span> <span class="nc">Boolean</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">texto</span><span class="p">.</span><span class="n">length</span> <span class="p">&lt;</span> <span class="n">limiteDeCaracteres</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">fun</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">val</span> <span class="py">validador</span><span class="p">:</span> <span class="nc">ValidadorDeTexto</span> <span class="p">=</span> <span class="nc">ValidadorDeTexto</span><span class="p">()</span>
+
+    <span class="kd">val</span> <span class="py">nome</span> <span class="p">=</span> <span class="s">"Carlos"</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">validador</span><span class="p">.</span><span class="nf">ehValido</span><span class="p">(</span><span class="n">nome</span><span class="p">))</span> <span class="p">{</span>
+        <span class="nf">println</span><span class="p">(</span><span class="s">"Nome valido"</span><span class="p">)</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="nf">println</span><span class="p">(</span><span class="s">"Nome invalido"</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Nome invalido
+</code></pre></div></div>
+
+<p>No código acima, temos a classe <code class="language-plaintext highlighter-rouge">ValidadorDeTexto</code>, que tem por objetivo validar o tamanho do texto através da função <code class="language-plaintext highlighter-rouge">ehValido(texto: String): Boolean</code> , que retorna <code class="language-plaintext highlighter-rouge">True</code> se o texto enviado tiver tamanho menor do que o definido na variável <code class="language-plaintext highlighter-rouge">limiteDeCaracteres</code>. Essa classe é uma <code class="language-plaintext highlighter-rouge">open class</code>, o que significa que podemos utilizá-la diretamente ou criar novas classes que estendem dela.</p>
+
+<p>Nesse primeiro exemplo, fizemos uso da classe <code class="language-plaintext highlighter-rouge">ValidadorDeTexto</code> diretamente passando o texto <code class="language-plaintext highlighter-rouge">Carlos</code> para ser validado. O resultado é <code class="language-plaintext highlighter-rouge">Nome invalido</code>, já que o texto possui 6 caracteres e ultrapassa o limite de 5 caracteres definido pela variável <code class="language-plaintext highlighter-rouge">limiteDeCaracteres</code>.</p>
+
+<p>Agora, imagine que temos um cenário onde precisamos criar um validador específico para nomes. Esse novo validador deve permitir nomes de até 10 caracteres.</p>
+
+<p>Já que a classe <code class="language-plaintext highlighter-rouge">ValidadorDeTexto</code> é uma <code class="language-plaintext highlighter-rouge">open class</code>, podemos criar o novo validador herdando dela e aproveitar a implementação da função já existente. Ou seja, a classe <code class="language-plaintext highlighter-rouge">ValidadorDeNome</code>, que iremos criar, será uma sub-classe de <code class="language-plaintext highlighter-rouge">ValidadorDeTexto</code>.</p>
+
+<p>Vejamos abaixo como ficaria:</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">open</span> <span class="kd">class</span> <span class="nc">ValidadorDeTexto</span> <span class="p">{</span>
+    <span class="k">open</span> <span class="kd">val</span> <span class="py">limiteDeCaracteres</span> <span class="p">=</span> <span class="mi">5</span>
+
+    <span class="k">fun</span> <span class="nf">ehValido</span><span class="p">(</span><span class="n">texto</span><span class="p">:</span> <span class="nc">String</span><span class="p">):</span> <span class="nc">Boolean</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">texto</span><span class="p">.</span><span class="n">length</span> <span class="p">&lt;</span> <span class="n">limiteDeCaracteres</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">class</span> <span class="nc">ValidadorDeNome</span> <span class="p">:</span> <span class="nc">ValidadorDeTexto</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">override</span> <span class="kd">val</span> <span class="py">limiteDeCaracteres</span> <span class="p">=</span> <span class="mi">10</span>
+<span class="p">}</span>
+
+<span class="k">fun</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">val</span> <span class="py">validador</span> <span class="p">=</span> <span class="nc">ValidadorDeNome</span><span class="p">()</span>
+
+    <span class="kd">val</span> <span class="py">nome</span> <span class="p">=</span> <span class="s">"Carlos"</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">validador</span><span class="p">.</span><span class="nf">ehValido</span><span class="p">(</span><span class="n">nome</span><span class="p">))</span> <span class="p">{</span>
+        <span class="nf">println</span><span class="p">(</span><span class="s">"Nome valido"</span><span class="p">)</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="nf">println</span><span class="p">(</span><span class="s">"Nome invalido"</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Nome valido
+</code></pre></div></div>
+
+<p>Do ponto de vista de código, essa é uma solução válida e não gera problemas de compilação ou execução. Porém, o Princípio de Substituição de Liskov é quebrado pois, quando substituímos a classe <code class="language-plaintext highlighter-rouge">ValidadorDeTexto</code> pela sua sub-classe <code class="language-plaintext highlighter-rouge">ValidadorDeNome</code>, o comportamento do sistema é alterado. Ou seja, o mesmo texto que antes era inválido, passou a ser válido após a mudança.</p>
+
+<p>Esse efeito é perigoso pelo fato de que a mudança na validação não é explícita e só é visível analisando a implementação, o que não pode ser aceito. Se esses validadores estivessem em uma biblioteca externa, é provável que não seja possível ter acesso à implementação. Assim, não seria possível avaliar o comportamento sem que o sistema seja executado ou através de testes unitários.</p>
+
+<h3 id="exceptions"><em>Exceptions</em></h3>
+
+<p>Esse princípio não trata apenas de comportamentos e retornos. É importante tomar cuidado também com o lançamento de exceções pelas sub-classes, onde novas exceções não podem ser lançadas pelas funções das sub-classes, a não ser que essas exceções sejam subtipos das exceções já lançadas pelas funções da classe principal.</p>
+
+<h2 id="referências">Referências</h2>
+
+<ul>
+  <li>Arquitetura Limpa: O Guia do Artesão para Estrutura e Design de Software. Martin, Robert C ; traduzido por Samantha Batista. Rio de Janeiro. Alta Books, 2018.</li>
+</ul>]]></content><author><name></name></author><category term="SOLID" /><category term="solid" /><category term="uncle bob" /><category term="software" /><category term="development" /><category term="liskov substitution" /><category term="substituição de liskov" /><summary type="html"><![CDATA[Em inglês, Liskov Substitution Principle.]]></summary></entry><entry><title type="html">Kotlin Scope Functions</title><link href="https://hallisonoliveira.com.br/posts/kotlin_scope_functions.html" rel="alternate" type="text/html" title="Kotlin Scope Functions" /><published>2022-08-11T00:00:00-03:00</published><updated>2022-08-11T00:00:00-03:00</updated><id>https://hallisonoliveira.com.br/posts/kotlin_scope_functions</id><content type="html" xml:base="https://hallisonoliveira.com.br/posts/kotlin_scope_functions.html"><![CDATA[<p>A biblioteca padrão do Kotlin possui algumas funções com o propósito de criar blocos de código dentro do contexto de um determinado objeto. Esses blocos temporários de código são criados utilizando <a href="https://kotlinlang.org/docs/lambdas.html">expressões lambda</a> e permitem que os atributos do objeto em questão sejam acessados sem a necessidade de utilizar o nome deles.</p>
+
+<p>Essas funções são chamadas de <em>Scope Functions</em> (ou Funções de Escopo), e atualmente há 5 delas: <code class="language-plaintext highlighter-rouge">let</code>, <code class="language-plaintext highlighter-rouge">run</code>, <code class="language-plaintext highlighter-rouge">with</code>, <code class="language-plaintext highlighter-rouge">apply</code>  e <code class="language-plaintext highlighter-rouge">also</code>.</p>
+
+<p>Essencialmente, elas possuem o mesmo funcionamento. A diferença está na forma como o objeto utilizado se torna disponível dentro do bloco de código e qual é o resultado da execução de todo o bloco.</p>
+
+<blockquote>
+  <p>💡 Todos os exemplos apresentados podem ser executados na página de <em>playground</em> do Kotlin, em <a href="https://play.kotlinlang.org/">https://play.kotlinlang.org/</a></p>
+</blockquote>
+
+<p>A medida que os artigos forem sendo publicados, eles serão listados abaixo:</p>]]></content><author><name></name></author><category term="Kotlin" /><category term="kotlin" /><category term="scope functions" /><summary type="html"><![CDATA[A biblioteca padrão do Kotlin possui algumas funções com o propósito de criar blocos de código dentro do contexto de um determinado objeto. Esses blocos temporários de código são criados utilizando expressões lambda e permitem que os atributos do objeto em questão sejam acessados sem a necessidade de utilizar o nome deles.]]></summary></entry><entry><title type="html">Let</title><link href="https://hallisonoliveira.com.br/kotlin_scope_functions_let/" rel="alternate" type="text/html" title="Let" /><published>2022-08-11T00:00:00-03:00</published><updated>2022-08-11T00:00:00-03:00</updated><id>https://hallisonoliveira.com.br/kotlin_scope_functions_let</id><content type="html" xml:base="https://hallisonoliveira.com.br/kotlin_scope_functions_let/"><![CDATA[<p>Aproveitando o exemplo apresentado na documentação do Kotlin, um uso comum do <code class="language-plaintext highlighter-rouge">let</code> é o apresentado abaixo:</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">Person</span><span class="p">(</span>
+    <span class="kd">val</span> <span class="py">name</span><span class="p">:</span> <span class="nc">String</span><span class="p">,</span>
+    <span class="kd">var</span> <span class="py">age</span><span class="p">:</span> <span class="nc">Int</span><span class="p">,</span>
+    <span class="kd">var</span> <span class="py">city</span><span class="p">:</span> <span class="nc">String</span>
+<span class="p">)</span> <span class="p">{</span>
+    <span class="k">fun</span> <span class="nf">moveTo</span><span class="p">(</span><span class="n">city</span><span class="p">:</span> <span class="nc">String</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="n">city</span> <span class="p">=</span> <span class="n">city</span>
+    <span class="p">}</span>
+
+    <span class="k">fun</span> <span class="nf">incrementAge</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="n">age</span><span class="p">++</span>
+    <span class="p">}</span>
+
+    <span class="k">override</span> <span class="k">fun</span> <span class="nf">toString</span><span class="p">():</span> <span class="nc">String</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="s">"${this.name}, ${this.age}, ${this.city}"</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">fun</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nc">Person</span><span class="p">(</span><span class="s">"Alice"</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="s">"Amsterdam"</span><span class="p">).</span><span class="nf">let</span> <span class="p">{</span>
+        <span class="nf">println</span><span class="p">(</span><span class="n">it</span><span class="p">.</span><span class="nf">toString</span><span class="p">())</span> <span class="c1">// Alice, 20, Amsterdam</span>
+        <span class="n">it</span><span class="p">.</span><span class="nf">moveTo</span><span class="p">(</span><span class="s">"London"</span><span class="p">)</span>
+        <span class="n">it</span><span class="p">.</span><span class="nf">incrementAge</span><span class="p">()</span>
+        <span class="nf">println</span><span class="p">(</span><span class="n">it</span><span class="p">.</span><span class="nf">toString</span><span class="p">())</span> <span class="c1">// Alice, 21, London</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Além do acesso direto aos atributos e funções do objeto, a função <code class="language-plaintext highlighter-rouge">let</code> também pode retornar um valor como resultado da execução do bloco. Nesse caso, a última linha do bloco poderá ser retornada como resultado.
+O próximo exemplo demonstra também a possibilidade de nomear o objeto dentro do bloco, removendo a ambiguidade do termo <code class="language-plaintext highlighter-rouge">it</code>, que pode causar confusão:</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">Person</span><span class="p">(</span>
+    <span class="kd">val</span> <span class="py">name</span><span class="p">:</span> <span class="nc">String</span><span class="p">,</span>
+    <span class="kd">var</span> <span class="py">age</span><span class="p">:</span> <span class="nc">Int</span><span class="p">,</span>
+    <span class="kd">var</span> <span class="py">city</span><span class="p">:</span> <span class="nc">String</span>
+<span class="p">)</span> <span class="p">{</span>
+    <span class="k">override</span> <span class="k">fun</span> <span class="nf">toString</span><span class="p">():</span> <span class="nc">String</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="s">"${this.name}, ${this.age}, ${this.city}"</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">fun</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">val</span> <span class="py">personString</span><span class="p">:</span> <span class="nc">String</span> <span class="p">=</span> <span class="nc">Person</span><span class="p">(</span><span class="s">"Pedro"</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="s">"São Paulo"</span><span class="p">).</span><span class="nf">let</span> <span class="p">{</span> <span class="n">person</span> <span class="p">-&gt;</span>
+        <span class="c1">// O resultado da última linha do bloco é retornado com resultado do bloco</span>
+        <span class="c1">// Pode-se acessar os atributos através do nome atribuido para o objeto dentro do bloco</span>
+        <span class="n">person</span><span class="p">.</span><span class="nf">toString</span><span class="p">()</span>
+    <span class="p">}</span>
+
+    <span class="nf">println</span><span class="p">(</span><span class="n">personString</span><span class="p">)</span> <span class="c1">// Pedro, 18, São Paulo</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Por fim, um uso muito útil do <code class="language-plaintext highlighter-rouge">let</code> é a execução do bloco apenas para objetos não-nulos. Para isso, basta utilizar o <a href="https://kotlinlang.org/docs/null-safety.html#safe-calls"><em>safe call operator</em> (operador de chamada segura)</a> da seguinte forma:</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">Person</span><span class="p">(</span>
+    <span class="kd">val</span> <span class="py">name</span><span class="p">:</span> <span class="nc">String</span><span class="p">,</span>
+    <span class="kd">var</span> <span class="py">age</span><span class="p">:</span> <span class="nc">Int</span><span class="p">,</span>
+    <span class="kd">var</span> <span class="py">city</span><span class="p">:</span> <span class="nc">String</span>
+<span class="p">)</span> <span class="p">{</span>
+
+    <span class="k">fun</span> <span class="nf">incrementAge</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="n">age</span><span class="p">++</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">fun</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="c1">// declaramos o objeto person como null</span>
+    <span class="kd">val</span> <span class="py">person</span><span class="p">:</span> <span class="nc">Person</span><span class="p">?</span> <span class="p">=</span> <span class="k">null</span>
+
+    <span class="c1">// Erro, pois o objeto person é nulo nesse ponto</span>
+    <span class="c1">// person.incrementAge()</span>
+
+    <span class="n">person</span><span class="o">?.</span><span class="nf">let</span> <span class="p">{</span>
+        <span class="c1">// Sem problemas, pois garantimos que o objeto person não é nulo com o uso do ?.let{ }</span>
+        <span class="n">it</span><span class="p">.</span><span class="nf">incrementAge</span><span class="p">()</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="referências">Referências</h2>
+
+<p><a href="https://kotlinlang.org/docs/scope-functions.html">Kotlin Scope Functions</a>. Acesso em 09 de Agosto de 2022.</p>]]></content><author><name></name></author><category term="Kotlin" /><category term="kotlin" /><category term="scope functions" /><category term="let" /><summary type="html"><![CDATA[Aproveitando o exemplo apresentado na documentação do Kotlin, um uso comum do let é o apresentado abaixo:]]></summary></entry><entry><title type="html">O - Princípio Aberto/Fechado</title><link href="https://hallisonoliveira.com.br/posts/open_close_principle.html" rel="alternate" type="text/html" title="O - Princípio Aberto/Fechado" /><published>2022-08-09T00:00:00-03:00</published><updated>2022-08-09T00:00:00-03:00</updated><id>https://hallisonoliveira.com.br/posts/open-close</id><content type="html" xml:base="https://hallisonoliveira.com.br/posts/open_close_principle.html"><![CDATA[<p>Em inglês, <em>Open Closed Principle</em>.</p>
+
+<p>A definição desse princípio, segundo seu criador Bertrand Meyer, é a seguinte:</p>
+
+<blockquote>
+  <p>Um artefato de software deve ser aberto para extensão, mas fechado para modificação.</p>
+
+</blockquote>
+
+<p>Ok, mas o que isso significa na prática?</p>
+
+<p>Decompondo um pouco essa definição, podemos dividi-la em duas partes:</p>
+
+<ul>
+  <li>Aberto para extensão significa que um módulo pode ser alterado para receber novos atributos às suas estruturas de dados existentes ou então, novas funções podem ser adicionadas.</li>
+  <li>Fechado para modificação significa que esse módulo específico já está bem definido e não há mais alteração alguma para fazer nele. Isso significa que ele está estável o suficiente para que outros módulos possam utilizá-lo.</li>
+</ul>
+
+<p>Tais definições parecem simples de entender. Porém, quando se trata de desenvolvimento de software, o cenário pode ser um tanto complexo, já que raramente um software é desenvolvido, concluído e não receberá mais modificações.</p>
+
+<p>No <em>post</em> em seu blog sobre esse princípio, Robert C. Martin cita uma nova definição:</p>
+
+<blockquote>
+  <p>Você deve ser capaz de estender o comportamento de um sistema sem a necessidade de modificar tal sistema.</p>
+
+</blockquote>
+
+<p>Ou seja, durante o processo de desenvolvimento, devemos pensar nos módulos, classes, funções, etc, de uma forma que seja possível adicionar novos comportamentos à eles sem que o código já existente seja modificado. Isso traz extensão (aberto para extensão), mas mantém o que já existe inalterado, evitando que <em>bugs</em> ou novos comportamentos não mapeados sejam introduzidos às funcionalidades já existentes (fechado para modificação).</p>
+
+<h2 id="estudo-de-caso-logger">Estudo de caso: Logger</h2>
+
+<p>Imagine que temos uma aplicação qualquer que possui a necessidade de registrar alguns <em>logs</em> de seu funcionamento. De início, esses <em>logs</em> serão apresentados apenas no terminal onde o sistema está sendo executado. O código poderia ficar semelhante ao apresentado a seguir:</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fun</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">val</span> <span class="py">logger</span> <span class="p">=</span> <span class="nc">Logger</span><span class="p">()</span>
+
+    <span class="n">logger</span><span class="p">.</span><span class="nf">debug</span><span class="p">(</span><span class="s">"Log de debug"</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">class</span> <span class="nc">Logger</span> <span class="p">{</span>
+    <span class="k">fun</span> <span class="nf">debug</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nc">String</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nf">println</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Log de debug
+</code></pre></div></div>
+
+<p>Agora, precisamos que a classe <code class="language-plaintext highlighter-rouge">Logger</code> registre os <em>logs</em> em arquivo também. Para isso, será necessário adicionar um parâmetro novo à implementação da classe e também será necessário fazer com que a função <code class="language-plaintext highlighter-rouge">debug(message: String)</code> envie o <em>log</em> para o arquivo. A implementação poderia ficar assim:</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fun</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">val</span> <span class="py">logger</span> <span class="p">=</span> <span class="nc">Logger</span><span class="p">()</span>
+
+    <span class="n">logger</span><span class="p">.</span><span class="nf">debug</span><span class="p">(</span><span class="s">"Log de debug"</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">class</span> <span class="nc">Logger</span> <span class="p">{</span>
+
+    <span class="k">private</span> <span class="kd">val</span> <span class="py">fileLogger</span> <span class="p">=</span> <span class="nc">FileLogger</span><span class="p">()</span>
+
+    <span class="k">fun</span> <span class="nf">debug</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nc">String</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">fileLogger</span><span class="p">.</span><span class="nf">writeLogToFile</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+        <span class="nf">println</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">class</span> <span class="nc">FileLogger</span> <span class="p">{</span>
+    <span class="k">private</span> <span class="kd">val</span> <span class="py">fileName</span> <span class="p">=</span> <span class="s">"/var/log/example.log"</span>
+    <span class="k">private</span> <span class="kd">val</span> <span class="py">logFile</span> <span class="p">=</span> <span class="nc">File</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span>
+
+    <span class="k">fun</span> <span class="nf">writeLogToFile</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nc">String</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">logFile</span><span class="p">.</span><span class="nf">bufferedWriter</span><span class="p">().</span><span class="nf">use</span> <span class="p">{</span> <span class="k">out</span> <span class="p">-&gt;</span>
+            <span class="k">out</span><span class="p">.</span><span class="nf">write</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Perceba que foi necessário criar a classe <code class="language-plaintext highlighter-rouge">FileLogger</code> para fazer a gravação dos <em>logs</em> em arquivo e alterar a classe <code class="language-plaintext highlighter-rouge">Logger</code> já existente para fazer uso da nova classe.</p>
+
+<p>Foi preciso também alterar a função <code class="language-plaintext highlighter-rouge">debug(message: String)</code> para que ela chame a função <code class="language-plaintext highlighter-rouge">writeLogToFile(message: String)</code> da classe <code class="language-plaintext highlighter-rouge">FileLogger</code> e assim, efetuar a gravação da mensagem no arquivo.</p>
+
+<p>Nesse exemplo, pode-se ver claramente a quebra do Princípio Aberto/Fechado, pois foi necessário alterar implementações já existentes, como foi o caso da classe <code class="language-plaintext highlighter-rouge">Logger</code>, para que uma nova funcionalidade fosse adicionada. Ou seja, ela está aberta para extensão, mas não está fechada para alteração.</p>
+
+<p>Vejamos agora esse mesmo exemplo sem que esse princípio seja violado:</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fun</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">val</span> <span class="py">logger</span><span class="p">:</span> <span class="nc">Logger</span> <span class="p">=</span> <span class="nc">TerminalLogger</span><span class="p">()</span>
+
+    <span class="n">logger</span><span class="p">.</span><span class="nf">debug</span><span class="p">(</span><span class="s">"Log de debug"</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">interface</span> <span class="nc">Logger</span> <span class="p">{</span>
+    <span class="k">fun</span> <span class="nf">debug</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nc">String</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">class</span> <span class="nc">TerminalLogger</span> <span class="p">:</span> <span class="nc">Logger</span> <span class="p">{</span>
+    <span class="k">override</span> <span class="k">fun</span> <span class="nf">debug</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nc">String</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nf">println</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Agora, temos a interface <code class="language-plaintext highlighter-rouge">Logger</code> que serve de contrato para qualquer tipo de <em>logger</em> que seja necessário no projeto. Assim, se precisarmos alterar a forma de registrar os <em>logs</em>, não será necessário alterar nenhuma implementação já existente, desde que os novos <em>loggers</em> sigam esse contrato.</p>
+
+<p>Para exibir os logs no terminal, criamos a classe <code class="language-plaintext highlighter-rouge">TerminalLogger</code>, que implementa a interface <code class="language-plaintext highlighter-rouge">Logger</code>, que será responsável por enviar as mensagens de <em>log</em> para o terminal.</p>
+
+<p>Para ilustrar o cenário onde seria necessário adicionar uma nova funcionalidade ao sistema, vamos trocar o <em>log</em> no terminal para <em>log</em> em arquivo, adicionando um novo <em>logger</em>.</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fun</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="c1">// Trocamos TerminalLogger por FileLogger</span>
+    <span class="kd">val</span> <span class="py">logger</span><span class="p">:</span> <span class="nc">Logger</span> <span class="p">=</span> <span class="nc">FileLogger</span><span class="p">()</span>
+
+    <span class="n">logger</span><span class="p">.</span><span class="nf">debug</span><span class="p">(</span><span class="s">"Log de debug"</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">interface</span> <span class="nc">Logger</span> <span class="p">{</span>
+    <span class="k">fun</span> <span class="nf">debug</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nc">String</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1">// Não utilizado nesse exemplo</span>
+<span class="kd">class</span> <span class="nc">TerminalLogger</span> <span class="p">:</span> <span class="nc">Logger</span> <span class="p">{</span>
+    <span class="k">override</span> <span class="k">fun</span> <span class="nf">debug</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nc">String</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nf">println</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">class</span> <span class="nc">FileLogger</span> <span class="p">:</span> <span class="nc">Logger</span> <span class="p">{</span>
+    <span class="k">private</span> <span class="kd">val</span> <span class="py">fileName</span> <span class="p">=</span> <span class="s">"/var/log/example.log"</span>
+    <span class="k">private</span> <span class="kd">val</span> <span class="py">logFile</span> <span class="p">=</span> <span class="nc">File</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span>
+
+    <span class="k">override</span> <span class="k">fun</span> <span class="nf">debug</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nc">String</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">logFile</span><span class="p">.</span><span class="nf">bufferedWriter</span><span class="p">().</span><span class="nf">use</span> <span class="p">{</span> <span class="k">out</span> <span class="p">-&gt;</span>
+            <span class="k">out</span><span class="p">.</span><span class="nf">write</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Perceba que a classe <code class="language-plaintext highlighter-rouge">FileLogger</code> também implementa a interface <code class="language-plaintext highlighter-rouge">Logger</code>, ou seja, ela também segue o mesmo contrato utilizado para a classe <code class="language-plaintext highlighter-rouge">TerminalLogger</code>. Isso quer dizer que, mesmo trocando <code class="language-plaintext highlighter-rouge">TerminalLogger</code> por <code class="language-plaintext highlighter-rouge">FileLogger</code> na função <code class="language-plaintext highlighter-rouge">main()</code>, o uso permanece o mesmo. Além disso, mantive a classe <code class="language-plaintext highlighter-rouge">TerminalLogger</code> no exemplo, mesmo ela não sendo utilizada, para mostrar que ela não precisou ser alterada.</p>
+
+<p>Agora, e se fosse necessário que os logs fossem registrados tanto no terminal, quanto em arquivo? Vejamos:</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fun</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">val</span> <span class="py">logger</span><span class="p">:</span> <span class="nc">Logger</span> <span class="p">=</span> <span class="nc">TerminalAndFileLogger</span><span class="p">()</span>
+
+    <span class="n">logger</span><span class="p">.</span><span class="nf">debug</span><span class="p">(</span><span class="s">"Log de debug"</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">interface</span> <span class="nc">Logger</span> <span class="p">{</span>
+    <span class="k">fun</span> <span class="nf">debug</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nc">String</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">class</span> <span class="nc">TerminalLogger</span> <span class="p">:</span> <span class="nc">Logger</span> <span class="p">{</span>
+    <span class="k">override</span> <span class="k">fun</span> <span class="nf">debug</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nc">String</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nf">println</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">class</span> <span class="nc">FileLogger</span> <span class="p">:</span> <span class="nc">Logger</span> <span class="p">{</span>
+    <span class="k">private</span> <span class="kd">val</span> <span class="py">fileName</span> <span class="p">=</span> <span class="s">"/var/log/example.log"</span>
+    <span class="k">private</span> <span class="kd">val</span> <span class="py">logFile</span> <span class="p">=</span> <span class="nc">File</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span>
+
+    <span class="k">override</span> <span class="k">fun</span> <span class="nf">debug</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nc">String</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">logFile</span><span class="p">.</span><span class="nf">bufferedWriter</span><span class="p">().</span><span class="nf">use</span> <span class="p">{</span> <span class="k">out</span> <span class="p">-&gt;</span>
+            <span class="k">out</span><span class="p">.</span><span class="nf">write</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">class</span> <span class="nc">TerminalAndFileLogger</span> <span class="p">:</span> <span class="nc">Logger</span> <span class="p">{</span>
+    <span class="k">private</span> <span class="kd">val</span> <span class="py">terminalLogger</span> <span class="p">=</span> <span class="nc">TerminalLogger</span><span class="p">()</span>
+    <span class="k">private</span> <span class="kd">val</span> <span class="py">fileLogger</span> <span class="p">=</span> <span class="nc">FileLogger</span><span class="p">()</span>
+
+    <span class="k">override</span> <span class="k">fun</span> <span class="nf">debug</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nc">String</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">terminalLogger</span><span class="p">.</span><span class="nf">debug</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+        <span class="n">fileLogger</span><span class="p">.</span><span class="nf">debug</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Temos agora a classe <code class="language-plaintext highlighter-rouge">TerminalAndFileLogger</code> que, como o próprio nome mostra, será responsável por chamar <code class="language-plaintext highlighter-rouge">TerminalLogger</code> e <code class="language-plaintext highlighter-rouge">FileLogger</code> e ela também implementa a interface <code class="language-plaintext highlighter-rouge">Logger</code>, fazendo com que ela siga o mesmo contrato das demais.</p>
+
+<p>Essa forma de implementação fica interessante pois o uso de todos os <em>loggers</em> permanece o mesmo. Assim, a forma de chamá-la na função <code class="language-plaintext highlighter-rouge">main()</code> não mudou em relação às outras. Além disso, mesmo adicionando uma nova forma de registro de <em>logs</em> no sistema, terminal e arquivo juntos, o código dos demais loggers não foi alterado, mantendo eles fechados para alterações.</p>
+
+<h2 id="conclusão">Conclusão</h2>
+
+<p>Esse princípio é muito interessante e importante para o desenvolvimento de um sistema, pois tendo ele em mente, acabamos por estruturar o projeto de uma forma que facilite futuras implementações, reduzindo o esforço para adicionar uma nova funcionalidade ou até mesmo, alterar as funcionalidades já existentes. Além disso, tivemos oportunidade de aplicar herança e polimorfismo, dois conceitos muito importantes da Orientação à Objetos (logo teremos <em>posts</em> sobre eles).</p>
+
+<h2 id="referências">Referências</h2>
+
+<ul>
+  <li>Arquitetura Limpa: O Guia do Artesão para Estrutura e Design de Software. Martin, Robert C. ; traduzido por Samantha Batista. Rio de Janeiro. Alta Books, 2018.</li>
+  <li><a href="http://blog.cleancoder.com/uncle-bob/2014/05/12/TheOpenClosedPrinciple.html">The Open Closed Principle. Martin, Robert C. 12 de maio de 2014</a></li>
+</ul>]]></content><author><name></name></author><category term="SOLID" /><category term="solid" /><category term="uncle bob" /><category term="software" /><category term="development" /><category term="open close" /><category term="aberto fechado" /><summary type="html"><![CDATA[Em inglês, Open Closed Principle.]]></summary></entry><entry><title type="html">S - Princípio da Responsabilidade Única</title><link href="https://hallisonoliveira.com.br/single_responsibility/" rel="alternate" type="text/html" title="S - Princípio da Responsabilidade Única" /><published>2022-08-02T00:00:00-03:00</published><updated>2022-08-02T00:00:00-03:00</updated><id>https://hallisonoliveira.com.br/single_responsibility</id><content type="html" xml:base="https://hallisonoliveira.com.br/single_responsibility/"><![CDATA[<p>Em inglês, <em>Single Responsibility Principle</em>.</p>
+
+<p>Esse é o princípio que mais causa confusão. Não pela complexidade do princípio em si, mas pelo nome, que pode levar à um entendimento diferente do que o princípio fala.</p>
+
+<h2 id="a-definição-equivocada">A definição equivocada</h2>
+
+<p>A principal confusão aqui é que, pelo nome, pode-se dizer que métodos/classes devem fazer apenas uma coisa, e fazê-lo bem feito. Esse é um princípio muito comum e deve sempre ser lembrado durante um processo de refatoração, quando temos funções e classes muito grandes e com muitas responsabilidades. Nesses casos, é importante que tais funções/classes sejam melhor divididas de forma que sejam criadas pequenas unidades funcionais e testáveis. Tais unidades, sejam funções ou classes, devem fazer apenas uma coisa, e fazê-la bem feito. Novamente, esse princípio é importante e faz todo sentido, mas não é essa a definição correta para o Princípio da Responsabilidade Única, conforme o próprio Robert C. Martin fala no livro <em>Clean Architecture</em>:</p>
+
+<blockquote>
+  <p>Não se engane, saiba que há um princípio com esse. Uma função deve fazer uma, e apenas uma, coisa. Usamos esse princípio quando refatoramos funções grandes em funções menores; usamos isso nos níveis mais baixos. Mas ele não é um dos princípios SOLID - não é SRP.</p>
+
+  <ul>
+    <li>Martin, Robert C. Clean Architecture.</li>
+  </ul>
+</blockquote>
+
+<h2 id="a-definição-correta">A definição correta</h2>
+
+<p>Ainda segundo Robert C. Martin, a melhor definição para esse princípio seria:</p>
+
+<blockquote>
+  <p>Um módulo deve ser responsável por um, e apenas um, ator.</p>
+
+  <ul>
+    <li>Martin, Robert C. Clean Architecture.</li>
+  </ul>
+</blockquote>
+
+<p>Por <strong>ator</strong>, entende-se que podem ser um usuário, um grupo de usuários, <em>stake holders</em>, ou qualquer outra pessoa que tenha possibilidade de solicitar uma mudança no projeto.</p>
+
+<p>Por <strong>módulo</strong>, entende-se qualquer conjunto coeso de funções e estruturas, que possam fazer parte de um mesmo escopo e com apenas um ator como responsável.</p>
+
+<h2 id="código">Código</h2>
+
+<p>Para esse princípio, segui o exemplo apresentado no livro, trazendo para a linguagem Kotlin. Observe a seguinte classe:</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">Employee</span> <span class="p">{</span>
+
+    <span class="k">fun</span> <span class="nf">calculatePay</span><span class="p">()</span> <span class="p">{</span> <span class="p">}</span>
+
+    <span class="k">fun</span> <span class="nf">reportHours</span><span class="p">()</span> <span class="p">{</span> <span class="p">}</span>
+
+    <span class="k">fun</span> <span class="nf">save</span><span class="p">()</span> <span class="p">{</span> <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>O Princípio da Responsabilidade Única é quebrado aqui pois temos em uma única classe, três funções pertencentes à contextos diferentes e, portanto, pertencentes à atores diferentes. Abaixo, a representação das funções e seus atores, conforme tratado no livro:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">calculatePay()</code> → Departamento de contabilidade, subordinado ao CFO;</li>
+  <li><code class="language-plaintext highlighter-rouge">reportHours()</code> → Departamento de recursos humanos, subordinado ao COO;</li>
+  <li><code class="language-plaintext highlighter-rouge">save()</code> → Departamento de TI, administradores de base de dados, subordinados ao CTO.</li>
+</ul>
+
+<p>A violação do princípio qui está no fato de que, caso qualquer um dos atores citados solicite alguma alteração na implementação de sua função, essa classe terá que mudar, podendo inclusive interferir no funcionamento das demais funções dos outros atores. Isso é um problema.</p>
+
+<p>Uma maneira que poderia ser utilizada para resolver esse problema é ter classes específicas para cada contexto e portanto, para cada ator. Assim, qualquer alteração solicitada por qualquer ator, afetará apenas a classe que faz parte do seu contexto. A solução em código poderia ficar da seguinte forma:</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fun</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">val</span> <span class="py">employee</span> <span class="p">=</span> <span class="nc">Employee</span><span class="p">(</span>
+    	<span class="n">salary</span> <span class="p">=</span> <span class="mf">1000.0</span><span class="p">,</span>
+        <span class="n">hours</span> <span class="p">=</span> <span class="mi">220</span>
+    <span class="p">)</span>
+
+    <span class="c1">// Para o cálculo</span>
+    <span class="kd">val</span> <span class="py">paymentCalculator</span> <span class="p">=</span> <span class="nc">PaymentCalculator</span><span class="p">()</span>
+    <span class="n">paymentCalculator</span><span class="p">.</span><span class="nf">calculate</span><span class="p">(</span><span class="n">employee</span><span class="p">.</span><span class="n">salary</span><span class="p">)</span>
+
+    <span class="c1">// Para o reporte de horas</span>
+    <span class="kd">val</span> <span class="py">hourReporter</span> <span class="p">=</span> <span class="nc">HourReporter</span><span class="p">()</span>
+    <span class="n">hourReporter</span><span class="p">.</span><span class="nf">report</span><span class="p">(</span><span class="n">employee</span><span class="p">.</span><span class="n">hours</span><span class="p">)</span>
+
+    <span class="c1">// Para salvar o objeto Employee na base de dados</span>
+    <span class="kd">val</span> <span class="py">employeeSaver</span> <span class="p">=</span> <span class="nc">EmployeeSaver</span><span class="p">()</span>
+    <span class="n">employeeSaver</span><span class="p">.</span><span class="nf">save</span><span class="p">(</span><span class="n">employee</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1">// Classe que representa o Employee</span>
+<span class="kd">data class</span> <span class="nc">Employee</span><span class="p">(</span>
+    <span class="kd">val</span> <span class="py">salary</span><span class="p">:</span> <span class="nc">Double</span><span class="p">,</span>
+    <span class="kd">val</span> <span class="py">hours</span><span class="p">:</span> <span class="nc">Int</span>
+<span class="p">)</span>
+
+<span class="c1">// Classe responsável por efetuar os cálculos.</span>
+<span class="kd">class</span> <span class="nc">PaymentCalculator</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">fun</span> <span class="nf">calculate</span><span class="p">(</span><span class="n">salary</span><span class="p">:</span> <span class="nc">Double</span><span class="p">):</span> <span class="nc">Double</span> <span class="p">{</span> <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// Classe responsável por efetuar o reporte de horas</span>
+<span class="kd">class</span> <span class="nc">HourReporter</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">fun</span> <span class="nf">report</span><span class="p">(</span><span class="n">hours</span><span class="p">:</span> <span class="nc">Int</span><span class="p">)</span> <span class="p">{</span> <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// Classe responsável por salvar o Employee na base de dados</span>
+<span class="kd">class</span> <span class="nc">EmployeeSaver</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">fun</span> <span class="nf">save</span><span class="p">(</span><span class="n">employee</span><span class="p">:</span> <span class="nc">Employee</span><span class="p">)</span> <span class="p">{</span> <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>No exemplo acima, temos a seguinte relação entre as classes e seus atores:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">PaymentCalculator</code> → Departamento de contabilidade, subordinado ao CFO</li>
+  <li><code class="language-plaintext highlighter-rouge">HourReporter</code> → Departamento de recursos humanos, subordinado ao COO</li>
+  <li><code class="language-plaintext highlighter-rouge">EmployeeSaver</code> → Departamento de TI, administradores de base de dados, subordinados ao CTO</li>
+</ul>
+
+<p>Perceba que, para cada contexto (ou ator), temos uma classe correspondente e nenhuma dessas classes possui referência para alguma outra. Ou seja, caso um ator solicite uma alteração na implementação da sua função, as classes dos outros atores não precisarão ser alteradas, mantendo os contextos coesos. Num caso real, a comunicação entre as classes poderia ser possível, desde que sejam tomados alguns cuidados. Mas para simplificar o exemplo, vamos considerar que isso não poderia acontecer.</p>
+
+<p>A única classe que pode ser conhecida por um ou mais contextos é a classe <code class="language-plaintext highlighter-rouge">Employee</code> que é a representação de um empregado no contexto do projeto.</p>
+
+<p>Outro detalhe importante a ser mencionado é o acréscimo de código ao projeto quando nos preocupamos com esse princípio, o que pode representar de início, mais complexidade. Porém, analisando mais a fundo, isso não é verdade, pois essa separação cria contextos específicos para cada ator. Além disso, cada função terá mais implementações auxiliares (funções privadas dentro das classes), o que justifica ainda mais a necessidade de separação em classes específicas.</p>
+
+<h2 id="conclusão">Conclusão</h2>
+
+<p>O Princípio da Responsabilidade Única é a base para a criação de classes com contexto definido e de uma forma que os limites entre as classes seja respeitado. Isso nos dá a possibilidade de reaproveitar essas classes em outros pontos do projeto. Além disso, classes coesas e divididas de acordo com suas responsabilidades contribuem para facilitar o desenvolvimento de testes unitários, outro tópico muito importante no desenvolvimento de software.</p>
+
+<h2 id="referências">Referências</h2>
+
+<ul>
+  <li>Arquitetura Limpa: O Guia do Artesão para Estrutura e Design de Software. Martin, Robert C ; traduzido por Samantha Batista. Rio de Janeiro. Alta Books, 2018.</li>
+</ul>]]></content><author><name></name></author><category term="SOLID" /><category term="solid" /><category term="uncle bob" /><category term="software" /><category term="development" /><category term="single responsibility" /><category term="responsabilidade unica" /><summary type="html"><![CDATA[Em inglês, Single Responsibility Principle.]]></summary></entry><entry><title type="html">SOLID by example com Kotlin</title><link href="https://hallisonoliveira.com.br/posts/solid.html" rel="alternate" type="text/html" title="SOLID by example com Kotlin" /><published>2022-08-02T00:00:00-03:00</published><updated>2022-08-02T00:00:00-03:00</updated><id>https://hallisonoliveira.com.br/posts/solid</id><content type="html" xml:base="https://hallisonoliveira.com.br/posts/solid.html"><![CDATA[<p>Desenvolver software é uma arte. Porém, ao contrário de algumas formas de arte, onde o observador possui a liberdade de interpreta-la com base nas suas próprias percepções, um software não pode possuir diferentes formas de interpretação. Então, o desenvolvimento de software é a arte de criar <strong>código claro, conciso e auto explicativo</strong>.</p>
+
+<p>Durante o processo de desenvolvimento, é muito fácil deixarmos de lado os termos <strong>claro, conciso e auto explicativo</strong>, criando códigos difíceis de serem entendidos, não manuteníveis e não expansíveis.</p>
+
+<p>Para auxiliar a evitar que situações como essa aconteçam, temos alguns princípios que devem ser seguidos durante todo o processo de desenvolvimento. Tais princípios criam uma base sólida para que o código do software tenha uma longevidade cada vez maior. Esses princípios são descritos no livro <a href="https://www.oreilly.com/library/view/clean-architecture-a/9780134494272/">Clean Architecture</a> (Arquitetura Limpa), escrito por <a href="https://en.wikipedia.org/wiki/Robert_C._Martin">Robert C. Martin</a> e dentre eles, temos os princípios SOLID, um acrônomo em inglês para:</p>
+
+<ul>
+  <li>Princípio da Responsabilidade Única (Single Responsibility)</li>
+  <li>Princípio Aberto/Fechado (Open Closed Principle)</li>
+  <li>Princípio da Substituição de Liskov (Liskov Substitution Principle)</li>
+  <li>Princípio da Segregação de Interface (Interface Segregation Principle)</li>
+  <li>Princípio da Inversão de Dependência (Dependency Inversion Principle)</li>
+</ul>
+
+<p>Essa série de artigos visa apresentar cada conceito presente no SOLID com exemplos em Kotlin, com o intuito de exemplificar de forma clara cada um deles.</p>]]></content><author><name></name></author><category term="SOLID" /><category term="solid" /><category term="uncle bob" /><category term="software" /><category term="development" /><summary type="html"><![CDATA[Desenvolver software é uma arte. Porém, ao contrário de algumas formas de arte, onde o observador possui a liberdade de interpreta-la com base nas suas próprias percepções, um software não pode possuir diferentes formas de interpretação. Então, o desenvolvimento de software é a arte de criar código claro, conciso e auto explicativo.]]></summary></entry></feed>

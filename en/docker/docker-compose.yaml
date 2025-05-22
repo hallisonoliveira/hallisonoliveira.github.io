@@ -1,0 +1,15 @@
+version: "3"
+
+services:
+  jekyll:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    volumes:
+      - ../:/srv/jekyll
+      - ../vendor/bundle:/usr/local/bundle  # cache de gems
+    ports:
+      - "4000:4000"
+    environment:
+      - JEKYLL_ENV=development
+    #command: bundle exec jekyll serve --watch --force_polling --host 0.0.0.0

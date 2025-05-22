@@ -1,0 +1,82 @@
+<!DOCTYPE html> <html lang="pt-br"> <head> <link href="http://gmpg.org/xfn/11" rel="profile"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <meta http-equiv="content-type" content="text/html; charset=utf-8"> <!-- Enable responsiveness on mobile devices--> <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1"> <title> I - Princípio da Segregação de Interface </title> <!-- CSS --> <link rel="stylesheet" href="/src/css/syntax.css"> <link rel="stylesheet" href="/src/css/lanyon.css"> <!-- Icons --> <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/public/apple-touch-icon-precomposed.png"> <link rel="shortcut icon" href="/assets/img/favicon.png"> <!-- RSS --> <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml"> <!-- Cards --> <link rel="stylesheet" href="/src/css/main.css"> <link rel="alternate" type="application/rss+xml" title="Hallison Oliveira" href="https://hallisonoliveira.com.br/feed.xml"> <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"> </head> <body> <input type="checkbox" class="sidebar-checkbox" id="sidebar-checkbox"> <!-- Toggleable sidebar --> <div class="sidebar" id="sidebar"> <div class="sidebar-item"> <h4 style="color: white; text-align: center">Hallison Oliveira</h4> </div> <div style="text-align: center"> <a href="https://www.linkedin.com/in/hallisonoliveira" style="margin-right: 8px"> <img src="/src/images/linkedin.png"/> </a> <a href="https://github.com/hallisonoliveira" style="margin-right: 15px"> <img src="/src/images/github.png"/> </a> <a href="https://twitter.com/hallisoncwb"> <img src="/src/images/twitter.png"/> </a> </div> <br /> <nav class="sidebar-nav"> <a class="sidebar-nav-item" href="/">Inicio</a> <a class="sidebar-nav-item" href="/posts">Posts</a> <a class="sidebar-nav-item" href="/about">Sobre</a> </nav> <div class="sidebar-item"> <p> &copy; 2025. Todos os direitos reservados. </p> </div> </div> <div class="wrap"> <div class="masthead"> <div class="container masthead-flex"> <h3 class="masthead-title"> <a href="/" title="Home">Hallison Oliveira</a> <small></small> </h3> <div class="language-switcher"> <a href="/en/posts/interface_segregation.html" class="lang-btn "> <img src="/assets/img/flags/us.svg" alt="English" class="flag-icon"> </a> </div> </div> </div> <div class="container"> <div class="wrapper"> <div class="row"> <div class="col-md-10"> <article class="page-post" itemscope itemtype="http://schema.org/BlogPosting"> <!-- Título do Post --> <h1 class="post-title" itemprop="name headline">I - Princípio da Segregação de Interface</h1> <!-- Categoria e Data --> <div class="post-meta"> <span class="post-category">SOLID</span> <span class="post-date"> <time datetime="2022-08-30T00:00:00-03:00" itemprop="datePublished">Aug 30, 2022</time> </span> </div> <!-- Imagem --> <div class="post-image"> <img src="/images/solid/interface_segregation.png" alt="I - Princípio da Segregação de Interface" class="post-image-img"> </div> <!-- Conteúdo do Post --> <div class="post-content" itemprop="articleBody"> <p>Em inglês, <em>Interface Segregation Principle</em>.</p> <h1 id="interfaces">Interfaces</h1> <p>Antes de falarmos sobre esse princípio, é importante entendermos o que é interface:</p> <blockquote> <p>Uma interface é uma série de abstrações ou um contrato ao qual uma determinada classe, que implementa essa interface, deve seguir. Nas interfaces, são definidos os comportamentos, ou seja, as funções e atributos que compõem o contrato, mas nada é implementado de fato.</p> </blockquote> <p>Assim sendo, considere seguinte interface:</p> <div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">interface</span> <span class="nc">Cachorro</span> <span class="p">{</span>
+    <span class="kd">val</span> <span class="py">cor</span><span class="p">:</span> <span class="nc">String</span>
+
+    <span class="k">fun</span> <span class="nf">latir</span><span class="p">()</span>
+<span class="p">}</span>
+</code></pre></div></div> <p>Perceba que nessa interface definimos duas coisas: um atributo <code class="language-plaintext highlighter-rouge">cor</code> e uma ação <code class="language-plaintext highlighter-rouge">latir()</code>. Porém, não foi definida uma cor e a função <code class="language-plaintext highlighter-rouge">latir</code> não possui implementação. Isso significa que esse é apenas o contrato obrigatório para todas as classes que implementam essa interface.</p> <p>Assim, quanto implementamos uma classe, esse contrato deve ser seguido e as implementações deverão ser feitas:</p> <div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">Beagle</span> <span class="p">:</span> <span class="nc">Cachorro</span> <span class="p">{</span>
+    <span class="k">override</span> <span class="kd">val</span> <span class="py">cor</span><span class="p">:</span> <span class="nc">String</span> <span class="p">=</span> <span class="s">"Branco"</span>
+
+    <span class="k">override</span> <span class="k">fun</span> <span class="nf">latir</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nf">println</span><span class="p">(</span><span class="s">"Latindo..."</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div> <h1 id="o-princípio">O princípio</h1> <p>Entendido o uso de interfaces, vamos analisar o Princípio de Segregação de Interface. Basicamente, esse princípio fala que as classes clientes, ou seja, as classes que implementam interfaces, não deveriam implementar comportamentos que elas não precisam. Isso quer dizer que precisamos definir nossas interfaces de forma que o conjunto de funções e atributos nela definidos, seja coeso, faça sentido.</p> <p>Vejamos a seguinte interface. Nela, estamos definindo um contrato a ser seguido por classes que representarão meios de transporte.</p> <div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">interface</span> <span class="nc">Transporte</span> <span class="p">{</span>
+
+    <span class="kd">val</span> <span class="py">quantidadeDeRodas</span><span class="p">:</span> <span class="nc">Int</span>
+
+    <span class="k">fun</span> <span class="nf">ligarMotor</span><span class="p">()</span>
+
+    <span class="k">fun</span> <span class="nf">andar</span><span class="p">()</span>
+<span class="p">}</span>
+</code></pre></div></div> <p>Vamos criar uma classe que implementa essa interface.</p> <div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">Carro</span> <span class="p">:</span> <span class="nc">Transporte</span> <span class="p">{</span>
+
+    <span class="k">override</span> <span class="kd">val</span> <span class="py">quantidadeDeRodas</span><span class="p">:</span> <span class="nc">Int</span> <span class="p">=</span> <span class="mi">4</span>
+
+    <span class="k">override</span> <span class="k">fun</span> <span class="nf">ligarMotor</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nf">println</span><span class="p">(</span><span class="s">"Motor ligado."</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="k">override</span> <span class="k">fun</span> <span class="nf">andar</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nf">println</span><span class="p">(</span><span class="s">"Andando..."</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div> <p>Até aqui, tudo bem! Estamos definindo uma classe <code class="language-plaintext highlighter-rouge">Carro</code> que consegue seguir por completo o contrato definido pela interface <code class="language-plaintext highlighter-rouge">Transporte</code>.</p> <p>Agora, imagine que precisamos aumentar as opções de meio de transporte do nosso sistema, adicionando a opção Bicicleta:</p> <div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">Bicicleta</span> <span class="p">:</span> <span class="nc">Transporte</span> <span class="p">{</span>
+
+    <span class="k">override</span> <span class="kd">val</span> <span class="py">quantidadeDeRodas</span><span class="p">:</span> <span class="nc">Int</span> <span class="p">=</span> <span class="mi">2</span>
+
+    <span class="k">override</span> <span class="k">fun</span> <span class="nf">ligarMotor</span><span class="p">()</span> <span class="p">{</span>
+        <span class="c1">// Não implementada. Bicicleta não tem motor.</span>
+    <span class="p">}</span>
+
+    <span class="k">override</span> <span class="k">fun</span> <span class="nf">andar</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nf">println</span><span class="p">(</span><span class="s">"Andando..."</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div> <p>No caso da classe <code class="language-plaintext highlighter-rouge">Bicicleta</code>, nem todo o contrato pôde ser seguido, pois bicicletas não possuem motor (considerando a bicicleta normal e não a elétrica), e portando, a função <code class="language-plaintext highlighter-rouge">ligarMotor()</code> não faz sentido para ela.</p> <p>Sendo assim, temos o Princípio de Segregação de Interface sendo violado na classe <code class="language-plaintext highlighter-rouge">Bicicleta</code>, pois a interface <code class="language-plaintext highlighter-rouge">Transporte</code> está definindo um comportamento que a classe não precisa e/ou não pode ter.</p> <p>Uma alternativa para esse caso, seria redefinir essa interface, melhorando nível de abstração de forma que o princípio não seja quebrado:</p> <div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">interface</span> <span class="nc">TransporteSemMotor</span> <span class="p">{</span>
+
+    <span class="kd">val</span> <span class="py">quantidadeDeRodas</span><span class="p">:</span> <span class="nc">Int</span>
+
+    <span class="k">fun</span> <span class="nf">andar</span><span class="p">()</span>
+<span class="p">}</span>
+
+<span class="kd">interface</span> <span class="nc">TransporteComMotor</span> <span class="p">{</span>
+
+    <span class="kd">val</span> <span class="py">quantidadeDeRodas</span><span class="p">:</span> <span class="nc">Int</span>
+
+    <span class="k">fun</span> <span class="nf">ligarMotor</span><span class="p">()</span>
+
+    <span class="k">fun</span> <span class="nf">andar</span><span class="p">()</span>
+<span class="p">}</span>
+
+<span class="kd">class</span> <span class="nc">Carro</span> <span class="p">:</span> <span class="nc">TransporteComMotor</span> <span class="p">{</span>
+
+    <span class="k">override</span> <span class="kd">val</span> <span class="py">quantidadeDeRodas</span><span class="p">:</span> <span class="nc">Int</span> <span class="p">=</span> <span class="mi">4</span>
+
+    <span class="k">override</span> <span class="k">fun</span> <span class="nf">ligarMotor</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nf">println</span><span class="p">(</span><span class="s">"Motor ligado."</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="k">override</span> <span class="k">fun</span> <span class="nf">andar</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nf">println</span><span class="p">(</span><span class="s">"Andando..."</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">class</span> <span class="nc">Bicicleta</span> <span class="p">:</span> <span class="nc">TransporteSemMotor</span> <span class="p">{</span>
+
+    <span class="k">override</span> <span class="kd">val</span> <span class="py">quantidadeDeRodas</span><span class="p">:</span> <span class="nc">Int</span> <span class="p">=</span> <span class="mi">4</span>
+
+    <span class="k">override</span> <span class="k">fun</span> <span class="nf">andar</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nf">println</span><span class="p">(</span><span class="s">"Andando..."</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div> <p>Agora, temos duas interfaces, uma para representar meios de transportes motorizados e outra para representar meios de transportes sem motor.</p> <p>É possível perceber também que ambas as interfaces possuem o atributo <code class="language-plaintext highlighter-rouge">quantidadeDeRodas</code> e a função <code class="language-plaintext highlighter-rouge">andar()</code>. Isso para o nosso exemplo é aceitável, já que é um exemplo simples. Mas, para um projeto real, que precisa ser escalável e ter suas interfaces muito bem definidas, talvez essa solução não seja interessante e a revisão dessas abstrações deva se feita com mais cuidado.</p> <h1 id="conclusão">Conclusão</h1> <p>O Princípio de Segregação de Interface é um princípio simples e fácil de ser violado ao adicionar nas interfaces comportamentos e atributos além do necessário. Por outro lado, a tentativa de corrigir essa violação pode fazer com que as abstrações sejam muito específicas, gerando um número de interfaces maior do que o necessário. Isso traz a reflexão de que, quando vamos definir abstrações para os nossos projetos, precisamos analisar com cuidado para que não criemos interfaces muito genéricas e nem muito específicas.</p> </div> </article> <div class="row"> <ul class="pager"> <li><a class="previous" href="/posts/solid.html">&laquo; SOLID by example com Kotlin</a></li> </ul> </div> <!-- Seção de Comentários (Disqus) --> <div class="row"> <br/> Comente abaixo e dê seu feedback em relação ao post. <br/> <div id="disqus_thread"></div> <script> var disqus_config = function () { this.page.url = 'https://hallisonoliveira.com.br/posts/interface_segregation.html'; this.page.identifier = '/posts/interface_segregation.html'; }; (function () { var d = document, s = d.createElement('script'); s.src = 'https://hallisonoliveira.disqus.com/embed.js'; s.setAttribute('data-timestamp', +new Date()); (d.head || d.body).appendChild(s); })(); </script> </div> </div> </div> </div> </div> </div> <label for="sidebar-checkbox" class="sidebar-toggle"></label> <script> (function(document) { var toggle = document.querySelector('.sidebar-toggle'); var sidebar = document.querySelector('#sidebar'); var checkbox = document.querySelector('#sidebar-checkbox'); document.addEventListener('click', function(e) { var target = e.target; if(!checkbox.checked || sidebar.contains(target) || (target === checkbox || target === toggle)) return; checkbox.checked = false; }, false); })(document); </script> <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script> <script src="/src/js/bootstrap.min.js"></script> </body> </html>

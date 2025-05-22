@@ -1,0 +1,69 @@
+<!DOCTYPE html> <html lang="pt-br"> <head> <link href="http://gmpg.org/xfn/11" rel="profile"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <meta http-equiv="content-type" content="text/html; charset=utf-8"> <!-- Enable responsiveness on mobile devices--> <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1"> <title> Let </title> <!-- CSS --> <link rel="stylesheet" href="/src/css/syntax.css"> <link rel="stylesheet" href="/src/css/lanyon.css"> <!-- Icons --> <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/public/apple-touch-icon-precomposed.png"> <link rel="shortcut icon" href="/assets/img/favicon.png"> <!-- RSS --> <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml"> <!-- Cards --> <link rel="stylesheet" href="/src/css/main.css"> <link rel="alternate" type="application/rss+xml" title="Hallison Oliveira" href="https://hallisonoliveira.com.br/feed.xml"> <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"> </head> <body> <input type="checkbox" class="sidebar-checkbox" id="sidebar-checkbox"> <!-- Toggleable sidebar --> <div class="sidebar" id="sidebar"> <div class="sidebar-item"> <h4 style="color: white; text-align: center">Hallison Oliveira</h4> </div> <div style="text-align: center"> <a href="https://www.linkedin.com/in/hallisonoliveira" style="margin-right: 8px"> <img src="/src/images/linkedin.png"/> </a> <a href="https://github.com/hallisonoliveira" style="margin-right: 15px"> <img src="/src/images/github.png"/> </a> <a href="https://twitter.com/hallisoncwb"> <img src="/src/images/twitter.png"/> </a> </div> <br /> <nav class="sidebar-nav"> <a class="sidebar-nav-item" href="/">Inicio</a> <a class="sidebar-nav-item" href="/posts">Posts</a> <a class="sidebar-nav-item" href="/about">Sobre</a> </nav> <div class="sidebar-item"> <p> &copy; 2025. Todos os direitos reservados. </p> </div> </div> <div class="wrap"> <div class="masthead"> <div class="container masthead-flex"> <h3 class="masthead-title"> <a href="/" title="Home">Hallison Oliveira</a> <small></small> </h3> <div class="language-switcher"> <a href="/en/kotlin_scope_functions_let/" class="lang-btn "> <img src="/assets/img/flags/us.svg" alt="English" class="flag-icon"> </a> </div> </div> </div> <div class="container"> <div class="wrapper"> <div class="row"> <div class="col-md-10"> <article class="page-post" itemscope itemtype="http://schema.org/BlogPosting"> <!-- Título do Post --> <h1 class="post-title" itemprop="name headline">Let</h1> <!-- Categoria e Data --> <div class="post-meta"> <span class="post-category">Kotlin</span> <span class="post-date"> <time datetime="2022-08-11T00:00:00-03:00" itemprop="datePublished">Aug 11, 2022</time> </span> </div> <!-- Imagem --> <div class="post-image"> <img src="/images/kotlin_scope_functions/let.png" alt="Let" class="post-image-img"> </div> <!-- Conteúdo do Post --> <div class="post-content" itemprop="articleBody"> <p>Aproveitando o exemplo apresentado na documentação do Kotlin, um uso comum do <code class="language-plaintext highlighter-rouge">let</code> é o apresentado abaixo:</p> <div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">Person</span><span class="p">(</span>
+    <span class="kd">val</span> <span class="py">name</span><span class="p">:</span> <span class="nc">String</span><span class="p">,</span>
+    <span class="kd">var</span> <span class="py">age</span><span class="p">:</span> <span class="nc">Int</span><span class="p">,</span>
+    <span class="kd">var</span> <span class="py">city</span><span class="p">:</span> <span class="nc">String</span>
+<span class="p">)</span> <span class="p">{</span>
+    <span class="k">fun</span> <span class="nf">moveTo</span><span class="p">(</span><span class="n">city</span><span class="p">:</span> <span class="nc">String</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="n">city</span> <span class="p">=</span> <span class="n">city</span>
+    <span class="p">}</span>
+
+    <span class="k">fun</span> <span class="nf">incrementAge</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="n">age</span><span class="p">++</span>
+    <span class="p">}</span>
+
+    <span class="k">override</span> <span class="k">fun</span> <span class="nf">toString</span><span class="p">():</span> <span class="nc">String</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="s">"${this.name}, ${this.age}, ${this.city}"</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">fun</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nc">Person</span><span class="p">(</span><span class="s">"Alice"</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="s">"Amsterdam"</span><span class="p">).</span><span class="nf">let</span> <span class="p">{</span>
+        <span class="nf">println</span><span class="p">(</span><span class="n">it</span><span class="p">.</span><span class="nf">toString</span><span class="p">())</span> <span class="c1">// Alice, 20, Amsterdam</span>
+        <span class="n">it</span><span class="p">.</span><span class="nf">moveTo</span><span class="p">(</span><span class="s">"London"</span><span class="p">)</span>
+        <span class="n">it</span><span class="p">.</span><span class="nf">incrementAge</span><span class="p">()</span>
+        <span class="nf">println</span><span class="p">(</span><span class="n">it</span><span class="p">.</span><span class="nf">toString</span><span class="p">())</span> <span class="c1">// Alice, 21, London</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div> <p>Além do acesso direto aos atributos e funções do objeto, a função <code class="language-plaintext highlighter-rouge">let</code> também pode retornar um valor como resultado da execução do bloco. Nesse caso, a última linha do bloco poderá ser retornada como resultado. O próximo exemplo demonstra também a possibilidade de nomear o objeto dentro do bloco, removendo a ambiguidade do termo <code class="language-plaintext highlighter-rouge">it</code>, que pode causar confusão:</p> <div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">Person</span><span class="p">(</span>
+    <span class="kd">val</span> <span class="py">name</span><span class="p">:</span> <span class="nc">String</span><span class="p">,</span>
+    <span class="kd">var</span> <span class="py">age</span><span class="p">:</span> <span class="nc">Int</span><span class="p">,</span>
+    <span class="kd">var</span> <span class="py">city</span><span class="p">:</span> <span class="nc">String</span>
+<span class="p">)</span> <span class="p">{</span>
+    <span class="k">override</span> <span class="k">fun</span> <span class="nf">toString</span><span class="p">():</span> <span class="nc">String</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="s">"${this.name}, ${this.age}, ${this.city}"</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">fun</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">val</span> <span class="py">personString</span><span class="p">:</span> <span class="nc">String</span> <span class="p">=</span> <span class="nc">Person</span><span class="p">(</span><span class="s">"Pedro"</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="s">"São Paulo"</span><span class="p">).</span><span class="nf">let</span> <span class="p">{</span> <span class="n">person</span> <span class="p">-&gt;</span>
+        <span class="c1">// O resultado da última linha do bloco é retornado com resultado do bloco</span>
+        <span class="c1">// Pode-se acessar os atributos através do nome atribuido para o objeto dentro do bloco</span>
+        <span class="n">person</span><span class="p">.</span><span class="nf">toString</span><span class="p">()</span>
+    <span class="p">}</span>
+
+    <span class="nf">println</span><span class="p">(</span><span class="n">personString</span><span class="p">)</span> <span class="c1">// Pedro, 18, São Paulo</span>
+<span class="p">}</span>
+</code></pre></div></div> <p>Por fim, um uso muito útil do <code class="language-plaintext highlighter-rouge">let</code> é a execução do bloco apenas para objetos não-nulos. Para isso, basta utilizar o <a href="https://kotlinlang.org/docs/null-safety.html#safe-calls"><em>safe call operator</em> (operador de chamada segura)</a> da seguinte forma:</p> <div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">Person</span><span class="p">(</span>
+    <span class="kd">val</span> <span class="py">name</span><span class="p">:</span> <span class="nc">String</span><span class="p">,</span>
+    <span class="kd">var</span> <span class="py">age</span><span class="p">:</span> <span class="nc">Int</span><span class="p">,</span>
+    <span class="kd">var</span> <span class="py">city</span><span class="p">:</span> <span class="nc">String</span>
+<span class="p">)</span> <span class="p">{</span>
+
+    <span class="k">fun</span> <span class="nf">incrementAge</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="n">age</span><span class="p">++</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">fun</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="c1">// declaramos o objeto person como null</span>
+    <span class="kd">val</span> <span class="py">person</span><span class="p">:</span> <span class="nc">Person</span><span class="p">?</span> <span class="p">=</span> <span class="k">null</span>
+
+    <span class="c1">// Erro, pois o objeto person é nulo nesse ponto</span>
+    <span class="c1">// person.incrementAge()</span>
+
+    <span class="n">person</span><span class="o">?.</span><span class="nf">let</span> <span class="p">{</span>
+        <span class="c1">// Sem problemas, pois garantimos que o objeto person não é nulo com o uso do ?.let{ }</span>
+        <span class="n">it</span><span class="p">.</span><span class="nf">incrementAge</span><span class="p">()</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div> <h2 id="referências">Referências</h2> <p><a href="https://kotlinlang.org/docs/scope-functions.html">Kotlin Scope Functions</a>. Acesso em 09 de Agosto de 2022.</p> </div> </article> <div class="row"> <ul class="pager"> <li><a class="previous" href="/posts/kotlin_scope_functions.html">&laquo; Kotlin Scope Functions</a></li> </ul> </div> <!-- Seção de Comentários (Disqus) --> <div class="row"> <br/> Comente abaixo e dê seu feedback em relação ao post. <br/> <div id="disqus_thread"></div> <script> var disqus_config = function () { this.page.url = 'https://hallisonoliveira.com.br/kotlin_scope_functions_let/'; this.page.identifier = '/kotlin_scope_functions_let/'; }; (function () { var d = document, s = d.createElement('script'); s.src = 'https://hallisonoliveira.disqus.com/embed.js'; s.setAttribute('data-timestamp', +new Date()); (d.head || d.body).appendChild(s); })(); </script> </div> </div> </div> </div> </div> </div> <label for="sidebar-checkbox" class="sidebar-toggle"></label> <script> (function(document) { var toggle = document.querySelector('.sidebar-toggle'); var sidebar = document.querySelector('#sidebar'); var checkbox = document.querySelector('#sidebar-checkbox'); document.addEventListener('click', function(e) { var target = e.target; if(!checkbox.checked || sidebar.contains(target) || (target === checkbox || target === toggle)) return; checkbox.checked = false; }, false); })(document); </script> <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script> <script src="/src/js/bootstrap.min.js"></script> </body> </html>
