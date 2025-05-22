@@ -19,16 +19,20 @@
     </a>
   </div>
   <br />
-  <!-- Geração do menu lateral -->
+
   <nav class="sidebar-nav">
     {% for item in site.data.urls %}
-    <a class="sidebar-nav-item" href="{{ item.url }}">{{ item.title }}</a>
+      {% if site.lang == "pt" %}
+        <a class="sidebar-nav-item" href="{{ item.url }}">{{ item.title }}</a>
+      {% else %}
+        <a class="sidebar-nav-item" href="{{ item.url_en }}">{{ item.title_en }}</a>
+      {% endif %}
     {% endfor %}
   </nav>
 
   <div class="sidebar-item">
     <p>
-      &copy; {{ site.time | date: '%Y' }}. Todos os direitos reservados.
+      &copy; {{ site.time | date: '%Y' }}. {% t drawer.rights_disclaimer %}
     </p>
   </div>
 </div>

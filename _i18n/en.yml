@@ -1,0 +1,19 @@
+home:
+  welcome: About ideas, codes, architectures and best practices in software development.
+  no_posts: Please wait... The posts are being prepared.
+
+posts:
+  title: "Posts"
+  no_posts: Please wait... The posts are being prepared.
+
+drawer:
+  rights_disclaimer: All the rights reserved.
+
+footer:
+  license_1: The content of this website is licensed under the
+  license_2: . This means you are free to copy, redistribute, and adapt the content, as long as you provide appropriate credit.
+  made_with: Made with
+  theme_adaptation: Theme adapted from 
+
+disqus:
+  description: Leave a comment below and share your feedback on the post.

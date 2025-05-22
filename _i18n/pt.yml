@@ -1,0 +1,19 @@
+home:
+  welcome: Sobre ideias, códigos, arquiteturas e boas práticas em desenvolvimento de software.
+  no_posts: Aguarde... Os posts estão sendo preparados.
+
+posts:
+  title: "Lista de posts"
+  no_posts: Aguarde... Os posts estão sendo preparados.
+
+drawer:
+  rights_disclaimer: Todos os direitos reservados.
+
+footer:
+  license_1: O conteúdo desse site está licenciado sob a
+  license_2: . Ou seja, você pode copiar, redistribuir e adaptar o conteúdo, mas você deve dar o crédito apropriado.
+  made_with: Feito com
+  theme_adaptation: Tema adaptado de
+
+disqus:
+  description: Comente abaixo e dê seu feedback em relação ao post.
