@@ -17,3 +17,7 @@ footer:
 
 disqus:
   description: Comente abaixo e dê seu feedback em relação ao post.
+
+not-found:
+  title: Página não encontrada.
+  message: Ops... Essa página não existe.
