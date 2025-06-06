@@ -17,3 +17,7 @@ footer:
 
 disqus:
   description: Leave a comment below and share your feedback on the post.
+
+not-found:
+  title: Page not found.
+  message: Ops... This page does not exist.
